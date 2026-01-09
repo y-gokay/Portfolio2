@@ -12,15 +12,24 @@ type LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("tr");
+  // Initialize with saved language from localStorage or default to Turkish
+  const getInitialLanguage = (): Language => {
+    if (typeof window === "undefined") return "tr";
+    const savedLanguage = localStorage.getItem("language") as Language | null;
+    if (savedLanguage && (savedLanguage === "tr" || savedLanguage === "en")) {
+      return savedLanguage;
+    }
+    return "tr";
+  };
+
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Get language from localStorage or default to Turkish
-    const savedLanguage = localStorage.getItem("language") as Language | null;
-    if (savedLanguage && (savedLanguage === "tr" || savedLanguage === "en")) {
-      setLanguageState(savedLanguage);
+    // Set initial HTML lang attribute
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = language;
     }
   }, []);
 
@@ -28,7 +37,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(lang);
     if (typeof window !== "undefined") {
       localStorage.setItem("language", lang);
-      // Update HTML lang attribute
+      // Update HTML lang attribute immediately
       document.documentElement.lang = lang;
     }
   };

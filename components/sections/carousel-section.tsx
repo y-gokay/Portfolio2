@@ -5,10 +5,12 @@ import Image from "next/image";
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { useLanguage } from "@/contexts/language-context";
 import { PortfolioModal } from "@/components/portfolio-modal";
-import { portfolioItems, PortfolioItem } from "@/lib/portfolio-data";
+import { PortfolioItem } from "@/lib/portfolio-data";
+import { usePortfolio } from "@/hooks/use-portfolio";
 
 export function CarouselSection() {
   const { t, language } = useLanguage();
+  const { portfolioItems, loading, error } = usePortfolio();
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -17,7 +19,9 @@ export function CarouselSection() {
   const baseX = useMotionValue(0);
   
   // Duplicate items for seamless loop (3 copies for smooth infinite scroll)
-  const duplicatedItems = [...portfolioItems, ...portfolioItems, ...portfolioItems];
+  const duplicatedItems = portfolioItems.length > 0 
+    ? [...portfolioItems, ...portfolioItems, ...portfolioItems]
+    : [];
   const itemWidth = 400; // md:w-[400px]
   const gap = 24; // gap-6 = 1.5rem = 24px
   const singleSetWidth = portfolioItems.length * (itemWidth + gap);
@@ -59,6 +63,36 @@ export function CarouselSection() {
     setIsModalOpen(false);
     setTimeout(() => setSelectedItem(null), 300);
   };
+
+  if (loading) {
+    return (
+      <section className="bg-primary dark:bg-primary/20 dark:border-t dark:border-b dark:border-primary/20 py-24 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 mb-12">
+          <div className="text-3xl md:text-4xl font-serif text-primary-foreground dark:text-foreground">
+            {t.carousel.title}
+          </div>
+        </div>
+        <div className="flex gap-6 py-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="shrink-0 w-[300px] md:w-[400px] h-[300px] rounded-xl bg-secondary/20 dark:bg-surface/20 animate-pulse"
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (error || portfolioItems.length === 0) {
+    return (
+      <section className="bg-primary dark:bg-primary/20 dark:border-t dark:border-b dark:border-primary/20 py-24 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <p className="text-primary-foreground dark:text-foreground">{error || "Portfolio verisi bulunamadı"}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>

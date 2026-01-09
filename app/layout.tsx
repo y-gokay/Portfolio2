@@ -35,12 +35,14 @@ export const metadata: Metadata = {
   authors: [{ name: "İpek Kökdemir" }],
   creator: "İpek Kökdemir",
   generator: "Next.js",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  ),
   alternates: {
     canonical: "/",
     languages: {
-      "tr": "/tr",
-      "en": "/en",
+      tr: "/tr",
+      en: "/en",
     },
   },
   openGraph: {
@@ -117,6 +119,21 @@ export default function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
+        {/* Initialize language from localStorage before React hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var savedLanguage = localStorage.getItem('language');
+                  if (savedLanguage === 'tr' || savedLanguage === 'en') {
+                    document.documentElement.lang = savedLanguage;
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -126,6 +143,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          storageKey="ipekweb-theme"
         >
           <LanguageProvider>{children}</LanguageProvider>
         </ThemeProvider>

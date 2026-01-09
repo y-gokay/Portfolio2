@@ -8,10 +8,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { PortfolioModal } from "@/components/portfolio-modal";
-import { portfolioItems, PortfolioItem } from "@/lib/portfolio-data";
+import { PortfolioItem } from "@/lib/portfolio-data";
+import { usePortfolio } from "@/hooks/use-portfolio";
 
 export function InsightsSection() {
   const { t, language } = useLanguage();
+  const { portfolioItems, loading, error } = usePortfolio();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,6 +32,36 @@ export function InsightsSection() {
     setIsModalOpen(false);
     setTimeout(() => setSelectedItem(null), 300);
   };
+
+  if (loading) {
+    return (
+      <section id="projects" className="bg-background px-6 py-24">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-muted-foreground dark:text-foreground/60 text-sm uppercase tracking-widest mb-8">
+            {t.insights.label}
+          </div>
+          <div className="divide-y divide-border dark:divide-border/50">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="py-6">
+                <div className="h-6 w-32 bg-secondary dark:bg-surface rounded animate-pulse mb-2" />
+                <div className="h-8 w-64 bg-secondary dark:bg-surface rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="projects" className="bg-background px-6 py-24">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -78,7 +110,7 @@ export function InsightsSection() {
 
           {/* Floating hover image */}
           <AnimatePresence>
-            {hoveredIndex !== null && (
+            {hoveredIndex !== null && portfolioItems[hoveredIndex] && (
               <motion.div
                 className="fixed pointer-events-none z-50 w-[200px] md:w-[300px] rounded-lg overflow-hidden shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/30 hidden md:block"
                 initial={{ opacity: 0, scale: 0.8 }}

@@ -11,14 +11,18 @@ import {
 } from "framer-motion";
 import { useLanguage } from "@/contexts/language-context";
 import { PortfolioModal } from "@/components/portfolio-modal";
-import { portfolioItems, PortfolioItem } from "@/lib/portfolio-data";
+import { PortfolioItem } from "@/lib/portfolio-data";
+import { usePortfolio } from "@/hooks/use-portfolio";
 
 export function ShowcaseSection() {
   const { t, language } = useLanguage();
+  const { portfolioItems, loading, error } = usePortfolio();
   const prefersReducedMotion = useReducedMotion() ?? false;
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Use scroll with ref - ref is always mounted since section is always rendered
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
@@ -72,8 +76,22 @@ export function ShowcaseSection() {
             {t.showcase.label}
           </motion.p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {displayItems.map((item, i) => (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-[400px] md:h-[500px] rounded-xl bg-secondary dark:bg-surface animate-pulse"
+                />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">{error}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {displayItems.map((item, i) => (
               <motion.div
                 key={item.id}
                 className="relative h-[400px] md:h-[500px] rounded-xl overflow-hidden group cursor-pointer dark:border dark:border-primary/20 dark:shadow-lg dark:shadow-primary/10"
@@ -115,8 +133,9 @@ export function ShowcaseSection() {
                   </h3>
                 </div>
               </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
