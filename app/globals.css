@@ -1,0 +1,158 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Opus Lilac & Ink Theme - Light Mode (OKLCH) */
+  --background: oklch(0.98 0.005 280);
+  --foreground: oklch(0.15 0.02 280);
+  --surface: oklch(0.96 0.01 280);
+  --ink: oklch(0.15 0.02 280);
+  --iris: oklch(0.45 0.18 270);
+  --lilac: oklch(0.85 0.08 280);
+  --lime: oklch(0.92 0.15 110);
+  --muted-foreground: oklch(0.5 0.02 280);
+
+  --card: oklch(0.96 0.01 280);
+  --card-foreground: oklch(0.15 0.02 280);
+  --popover: oklch(0.98 0.005 280);
+  --popover-foreground: oklch(0.15 0.02 280);
+  --primary: oklch(0.45 0.18 270);
+  --primary-foreground: oklch(0.98 0.005 280);
+  --secondary: oklch(0.94 0.01 280);
+  --secondary-foreground: oklch(0.15 0.02 280);
+  --muted: oklch(0.94 0.01 280);
+  --accent: oklch(0.85 0.08 280);
+  --accent-foreground: oklch(0.15 0.02 280);
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(0.6 0.2 25);
+  --border: oklch(0.9 0.01 280);
+  --input: oklch(0.9 0.01 280);
+  --ring: oklch(0.45 0.18 270);
+  
+  --radius: 0.75rem;
+}
+
+.dark {
+  /* Opus Lilac & Ink Theme - Dark Mode (OKLCH) */
+  --background: oklch(0.18 0.01 280);
+  --foreground: oklch(0.98 0.005 280);
+  --surface: oklch(0.22 0.02 280);
+  --ink: oklch(0.98 0.005 280);
+  --iris: oklch(0.55 0.15 270);
+  --lilac: oklch(0.7 0.1 280);
+  --lime: oklch(0.8 0.12 110);
+  --muted-foreground: oklch(0.65 0.01 280);
+
+  --card: oklch(0.22 0.02 280);
+  --card-foreground: oklch(0.98 0.005 280);
+  --popover: oklch(0.18 0.01 280);
+  --popover-foreground: oklch(0.98 0.005 280);
+  --primary: oklch(0.6 0.18 270); /* Daha parlak mor */
+  --primary-foreground: oklch(0.18 0.01 280);
+  --secondary: oklch(0.25 0.02 280);
+  --secondary-foreground: oklch(0.98 0.005 280);
+  --muted: oklch(0.25 0.02 280);
+  --accent: oklch(0.35 0.08 280);
+  --accent-foreground: oklch(0.98 0.005 280);
+  --border: oklch(0.28 0.02 280);
+  --input: oklch(0.28 0.02 280);
+  --ring: oklch(0.6 0.18 270);
+}
+
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-serif: "Instrument Serif", "Georgia", serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-iris: var(--iris);
+  --color-lilac: var(--lilac);
+  --color-lime: var(--lime);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-marquee: marquee 30s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+}
+
+.ticket-edge {
+  mask-image: radial-gradient(circle at 0 50%, transparent 8px, black 8px),
+    radial-gradient(circle at 100% 50%, transparent 8px, black 8px);
+  mask-size: 51% 100%;
+  mask-position: left, right;
+  mask-repeat: no-repeat;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.react-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.react-player video {
+  object-fit: cover;
+}
+
