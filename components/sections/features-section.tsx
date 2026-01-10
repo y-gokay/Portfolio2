@@ -17,7 +17,7 @@ function TypeTester() {
   return (
     <div className="flex items-center justify-center h-full">
       <motion.span
-        className="font-serif text-6xl md:text-8xl text-foreground"
+        className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-foreground"
         animate={{ scale }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
@@ -40,12 +40,12 @@ function LayoutAnimation() {
   const layouts = ["grid-cols-2 grid-rows-2", "grid-cols-3 grid-rows-1", "grid-cols-1 grid-rows-3"]
 
   return (
-    <div className="h-full p-4 flex items-center justify-center">
-      <motion.div className={`grid ${layouts[layout]} gap-2 w-full max-w-[140px]`} layout>
+    <div className="h-full p-2 sm:p-4 flex items-center justify-center">
+      <motion.div className={`grid ${layouts[layout]} gap-1.5 sm:gap-2 w-full max-w-[100px] sm:max-w-[120px] md:max-w-[140px]`} layout>
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
-            className="bg-primary/20 dark:bg-primary/40 rounded-md min-h-[30px] shadow-sm dark:shadow-md dark:shadow-primary/20"
+            className="bg-primary/20 dark:bg-primary/40 rounded-md min-h-[24px] sm:min-h-[28px] md:min-h-[30px] shadow-sm dark:shadow-md dark:shadow-primary/20"
             layout
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           />
@@ -57,14 +57,14 @@ function LayoutAnimation() {
 
 function SpeedIndicator() {
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-4">
-      <div className="flex gap-2">
-        <div className="w-12 h-12 rounded-full bg-primary/20 dark:bg-primary/30 shadow-sm dark:shadow-md dark:shadow-primary/10" />
-        <div className="w-12 h-12 rounded-full bg-primary/40 dark:bg-primary/50 shadow-sm dark:shadow-md dark:shadow-primary/15" />
-        <div className="w-12 h-12 rounded-full bg-primary/60 dark:bg-primary/70 shadow-sm dark:shadow-md dark:shadow-primary/20" />
-        <div className="w-12 h-12 rounded-full bg-primary dark:bg-primary shadow-md dark:shadow-lg dark:shadow-primary/30" />
+    <div className="flex flex-col items-center justify-center h-full gap-3 sm:gap-4">
+      <div className="flex gap-1.5 sm:gap-2">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-primary/20 dark:bg-primary/30 shadow-sm dark:shadow-md dark:shadow-primary/10" />
+        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-primary/40 dark:bg-primary/50 shadow-sm dark:shadow-md dark:shadow-primary/15" />
+        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-primary/60 dark:bg-primary/70 shadow-sm dark:shadow-md dark:shadow-primary/20" />
+        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-primary dark:bg-primary shadow-md dark:shadow-lg dark:shadow-primary/30" />
       </div>
-      <span className="text-sm text-muted-foreground dark:text-foreground/70">Color Theory</span>
+      <span className="text-xs sm:text-sm text-muted-foreground dark:text-foreground/70">Color Theory</span>
     </div>
   )
 }
@@ -73,21 +73,21 @@ export function FeaturesSection() {
   const { t } = useLanguage()
   
   return (
-    <section className="bg-background px-6 py-24">
+    <section className="bg-background px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24">
       <div className="max-w-6xl mx-auto">
         <motion.p
-          className="text-muted-foreground dark:text-foreground/60 text-sm uppercase tracking-widest mb-8"
+          className="text-muted-foreground dark:text-foreground/60 text-xs sm:text-sm uppercase tracking-widest mb-6 sm:mb-8 text-center sm:text-left"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-50px" }}
         >
           {t.features.label}
         </motion.p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           {/* Typography Card */}
           <motion.div
-            className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-xl p-8 min-h-[280px] flex flex-col shadow-sm dark:shadow-lg dark:shadow-primary/5"
+            className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 min-h-[240px] sm:min-h-[280px] flex flex-col shadow-sm dark:shadow-lg dark:shadow-primary/5"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -99,18 +99,18 @@ export function FeaturesSection() {
             <div className="flex-1">
               <TypeTester />
             </div>
-            <div className="mt-4">
-              <h3 className="font-serif text-xl text-foreground">{t.features.typography.title}</h3>
-              <p className="text-muted-foreground dark:text-foreground/70 text-sm mt-1">{t.features.typography.description}</p>
+            <div className="mt-3 sm:mt-4">
+              <h3 className="font-serif text-lg sm:text-xl text-foreground">{t.features.typography.title}</h3>
+              <p className="text-muted-foreground dark:text-foreground/70 text-xs sm:text-sm mt-1 sm:mt-2 leading-relaxed">{t.features.typography.description}</p>
             </div>
           </motion.div>
 
           {/* Layouts Card */}
           <motion.div
-            className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-xl p-8 min-h-[280px] flex flex-col shadow-sm dark:shadow-lg dark:shadow-primary/5"
+            className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 min-h-[240px] sm:min-h-[280px] flex flex-col shadow-sm dark:shadow-lg dark:shadow-primary/5"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ delay: 0.1 }}
             whileHover={{ scale: 0.98 }}
             whileTap={{ scale: 0.96 }}
@@ -119,18 +119,18 @@ export function FeaturesSection() {
             <div className="flex-1">
               <LayoutAnimation />
             </div>
-            <div className="mt-4">
-              <h3 className="font-serif text-xl text-foreground">{t.features.layout.title}</h3>
-              <p className="text-muted-foreground dark:text-foreground/70 text-sm mt-1">{t.features.layout.description}</p>
+            <div className="mt-3 sm:mt-4">
+              <h3 className="font-serif text-lg sm:text-xl text-foreground">{t.features.layout.title}</h3>
+              <p className="text-muted-foreground dark:text-foreground/70 text-xs sm:text-sm mt-1 sm:mt-2 leading-relaxed">{t.features.layout.description}</p>
             </div>
           </motion.div>
 
           {/* Speed Card */}
           <motion.div
-            className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-xl p-8 min-h-[280px] flex flex-col shadow-sm dark:shadow-lg dark:shadow-primary/5"
+            className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 min-h-[240px] sm:min-h-[280px] flex flex-col shadow-sm dark:shadow-lg dark:shadow-primary/5 sm:col-span-2 md:col-span-1"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ delay: 0.2 }}
             whileHover={{ scale: 0.98 }}
             whileTap={{ scale: 0.96 }}
@@ -139,9 +139,9 @@ export function FeaturesSection() {
             <div className="flex-1">
               <SpeedIndicator />
             </div>
-            <div className="mt-4">
-              <h3 className="font-serif text-xl text-foreground">{t.features.color.title}</h3>
-              <p className="text-muted-foreground dark:text-foreground/70 text-sm mt-1">{t.features.color.description}</p>
+            <div className="mt-3 sm:mt-4">
+              <h3 className="font-serif text-lg sm:text-xl text-foreground">{t.features.color.title}</h3>
+              <p className="text-muted-foreground dark:text-foreground/70 text-xs sm:text-sm mt-1 sm:mt-2 leading-relaxed">{t.features.color.description}</p>
             </div>
           </motion.div>
         </div>

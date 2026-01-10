@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { toast } from "sonner";
 
 export function ContactForm() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -32,18 +32,16 @@ export function ContactForm() {
     setIsSubmitting(false);
   };
 
-  const { language } = useLanguage();
-
   return (
     <motion.form
       onSubmit={handleSubmit}
-      className="space-y-6"
+      className="space-y-4 sm:space-y-5 md:space-y-6"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={{ once: true, margin: "-50px" }}
     >
       <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-2 text-foreground">
+        <label htmlFor="name" className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-foreground">
           {language === "tr" ? "Ad Soyad" : "Name"}
         </label>
         <input
@@ -52,13 +50,13 @@ export function ContactForm() {
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-secondary dark:bg-surface dark:border-primary/20 border border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary/50"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-secondary dark:bg-surface dark:border-primary/20 border border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary/50 transition-all"
           placeholder={language === "tr" ? "Adınız ve soyadınız" : "Your name"}
         />
       </div>
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
+        <label htmlFor="email" className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-foreground">
           {language === "tr" ? "E-posta" : "Email"}
         </label>
         <input
@@ -67,22 +65,22 @@ export function ContactForm() {
           required
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-secondary dark:bg-surface dark:border-primary/20 border border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary/50"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-secondary dark:bg-surface dark:border-primary/20 border border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary/50 transition-all"
           placeholder={language === "tr" ? "E-posta adresiniz" : "Your email"}
         />
       </div>
 
       <div>
-        <label htmlFor="message" className="block text-sm font-medium mb-2 text-foreground">
+        <label htmlFor="message" className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-foreground">
           {language === "tr" ? "Mesaj" : "Message"}
         </label>
         <textarea
           id="message"
           required
-          rows={6}
+          rows={5}
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg bg-secondary dark:bg-surface dark:border-primary/20 border border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary/50 resize-none"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-secondary dark:bg-surface dark:border-primary/20 border border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary/50 resize-none transition-all"
           placeholder={
             language === "tr"
               ? "Mesajınızı buraya yazın..."
@@ -94,19 +92,19 @@ export function ContactForm() {
       <motion.button
         type="submit"
         disabled={isSubmitting}
-        className="w-full px-6 py-3 bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground rounded-lg hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg dark:shadow-xl dark:shadow-primary/20"
+        className="w-full px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground rounded-lg hover:bg-primary/90 dark:hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg dark:shadow-xl dark:shadow-primary/20 font-medium"
         whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
         whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
       >
         {isSubmitting ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            {language === "tr" ? "Gönderiliyor..." : "Sending..."}
+            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+            <span>{language === "tr" ? "Gönderiliyor..." : "Sending..."}</span>
           </>
         ) : (
           <>
-            <Send className="w-5 h-5" />
-            {language === "tr" ? "Gönder" : "Send"}
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>{language === "tr" ? "Gönder" : "Send"}</span>
           </>
         )}
       </motion.button>

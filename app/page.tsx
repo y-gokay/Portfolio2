@@ -22,8 +22,11 @@ export default function Home() {
         <StickyHeader />
         <ScrollProgress />
         <main id="main-content" className="bg-background">
-          <ThemeToggle />
-          <LanguageToggle />
+          {/* Mobile-only toggle buttons (Desktop'ta header içinde) */}
+          <div className="md:hidden">
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
           <HeroSection />
           <ManifestoSection />
           <FeaturesSection />

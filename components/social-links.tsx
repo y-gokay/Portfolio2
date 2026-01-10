@@ -90,7 +90,7 @@ export function SocialLinks() {
   const socialLinks = getSocialLinks();
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-wrap items-center gap-3 sm:gap-4 justify-start">
       {socialLinks.map((link, index) => {
         const Icon = link.icon;
         return (
@@ -100,15 +100,15 @@ export function SocialLinks() {
             target={link.name !== "Email" ? "_blank" : undefined}
             rel={link.name !== "Email" ? "noopener noreferrer" : undefined}
             aria-label={link.ariaLabel}
-            className="p-3 rounded-full bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 hover:bg-accent dark:hover:bg-accent/80 transition-colors text-foreground shadow-sm dark:shadow-md dark:shadow-primary/10"
+            className="p-2.5 sm:p-3 rounded-full bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 hover:bg-accent dark:hover:bg-accent/80 transition-colors text-foreground shadow-sm dark:shadow-md dark:shadow-primary/10 flex-shrink-0"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
           </motion.a>
         );
       })}
