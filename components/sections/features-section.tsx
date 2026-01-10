@@ -73,7 +73,7 @@ export function FeaturesSection() {
   const { t } = useLanguage()
   
   return (
-    <section className="bg-background px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24">
+    <section id="skills" className="bg-background px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24">
       <div className="max-w-6xl mx-auto">
         <motion.p
           className="text-muted-foreground dark:text-foreground/60 text-xs sm:text-sm uppercase tracking-widest mb-6 sm:mb-8 text-center sm:text-left"
@@ -81,10 +81,22 @@ export function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
         >
-          {t.features.label}
+          {t.skills.title}
         </motion.p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        {/* Expertise Areas */}
+        <motion.div
+          className="mb-8 sm:mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+        >
+          <h2 className="text-xl sm:text-2xl font-serif text-foreground mb-6 sm:mb-8">
+            {t.skills.expertise.title}
+          </h2>
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
           {/* Typography Card */}
           <motion.div
             className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 min-h-[240px] sm:min-h-[280px] flex flex-col shadow-sm dark:shadow-lg dark:shadow-primary/5"
@@ -145,6 +157,40 @@ export function FeaturesSection() {
             </div>
           </motion.div>
         </div>
+
+        {/* Tools Section - Direct list without title */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {/* All Tools - Combined list without categories */}
+            {[
+              ...t.skills.tools.categories.design.items,
+              ...t.skills.tools.categories.prototyping.items,
+              ...t.skills.tools.categories.development.items,
+            ]
+              .filter((tool, index, self) => self.indexOf(tool) === index) // Remove duplicates
+              .map((tool, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-secondary dark:bg-secondary/80 dark:border dark:border-primary/20 rounded-lg sm:rounded-xl p-3 sm:p-4 flex items-center justify-center text-center min-h-[60px] sm:min-h-[80px]"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 + index * 0.05 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="text-xs sm:text-sm font-medium text-foreground">
+                    {tool}
+                  </span>
+                </motion.div>
+              ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   )

@@ -2,10 +2,11 @@
 
 import { useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
+import { Download } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 
 export function ManifestoSection() {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -59,32 +60,86 @@ export function ManifestoSection() {
 
         {/* Additional About Info */}
         <motion.div
-          className="mt-8 sm:mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto px-4 sm:px-6"
+          className="mt-8 sm:mt-12 md:mt-16 space-y-8 sm:space-y-10 max-w-4xl mx-auto px-4 sm:px-6"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ delay: 0.5 }}
         >
-          <div className="space-y-2 sm:space-y-3">
-            <h3 className="text-lg sm:text-xl font-serif text-foreground">
-              {language === "tr" ? "Eğitim" : "Education"}
+          {/* Professional Story */}
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-xl sm:text-2xl font-serif text-foreground">
+              {t.about.story.title}
             </h3>
-            <p className="text-sm sm:text-base text-muted-foreground dark:text-foreground/70 leading-relaxed">
-              {language === "tr"
-                ? "Grafik Tasarım bölümünde lisans eğitimi alıyorum. Tipografi, görsel iletişim ve dijital tasarım alanlarında kendimi geliştiriyorum."
-                : "I'm pursuing a bachelor's degree in Graphic Design. I'm developing myself in typography, visual communication, and digital design."}
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground dark:text-foreground/70 leading-relaxed">
+              {t.about.story.content}
             </p>
           </div>
-          <div className="space-y-2 sm:space-y-3">
-            <h3 className="text-lg sm:text-xl font-serif text-foreground">
-              {language === "tr" ? "Yaklaşım" : "Approach"}
+
+          {/* Approach */}
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-xl sm:text-2xl font-serif text-foreground">
+              {t.about.approach.title}
             </h3>
-            <p className="text-sm sm:text-base text-muted-foreground dark:text-foreground/70 leading-relaxed">
-              {language === "tr"
-                ? "Her projede yaratıcılık ve işlevselliği birleştirerek, anlamlı ve etkileyici tasarımlar oluşturmayı hedefliyorum."
-                : "I aim to create meaningful and impactful designs by combining creativity and functionality in every project."}
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground dark:text-foreground/70 leading-relaxed">
+              {t.about.approach.content}
             </p>
           </div>
+
+          {/* Interests */}
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-xl sm:text-2xl font-serif text-foreground">
+              {t.about.interests.title}
+            </h3>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              {t.about.interests.items.map((item, index) => (
+                <motion.li
+                  key={index}
+                  className="flex items-center text-sm sm:text-base text-muted-foreground dark:text-foreground/70"
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.6 + index * 0.1 }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3 flex-shrink-0" />
+                  {item}
+                </motion.li>
+              ))}
+            </ul>
+          </div>
+
+          {/* CV Download Button */}
+          <motion.div
+            className="mt-8 sm:mt-10 md:mt-12 flex justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ delay: 0.8 }}
+          >
+            <a
+              href="/cv.pdf"
+              download
+              className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg sm:rounded-xl hover:bg-primary/90 transition-colors shadow-sm dark:shadow-lg dark:shadow-primary/20 font-medium text-sm sm:text-base"
+              onClick={(e) => {
+                // Eğer PDF dosyası yoksa, resume sayfasına yönlendir
+                // Bu kontrolü yapmak için fetch ile kontrol edebiliriz
+                fetch("/cv.pdf", { method: "HEAD" })
+                  .then((res) => {
+                    if (!res.ok) {
+                      e.preventDefault();
+                      window.location.href = "/resume";
+                    }
+                  })
+                  .catch(() => {
+                    e.preventDefault();
+                    window.location.href = "/resume";
+                  });
+              }}
+            >
+              <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>{t.resume.download}</span>
+            </a>
+          </motion.div>
         </motion.div>
       </div>
     </section>

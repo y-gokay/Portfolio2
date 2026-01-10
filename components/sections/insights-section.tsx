@@ -66,19 +66,24 @@ export function InsightsSection() {
   return (
     <>
       <section
-        id="projects"
+        id="research"
         className="bg-background px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24"
         onMouseMove={handleMouseMove}
       >
         <div className="max-w-4xl mx-auto">
-          <motion.p
-            className="text-muted-foreground dark:text-foreground/60 text-xs sm:text-sm uppercase tracking-widest mb-6 sm:mb-8 text-center sm:text-left px-2"
+          <motion.div
+            className="mb-6 sm:mb-8 px-2"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
           >
-            {t.insights.label}
-          </motion.p>
+            <p className="text-muted-foreground dark:text-foreground/60 text-xs sm:text-sm uppercase tracking-widest mb-2 sm:mb-3 text-center sm:text-left">
+              {t.research.title}
+            </p>
+            <p className="text-sm sm:text-base text-muted-foreground dark:text-foreground/70 text-center sm:text-left">
+              {t.research.subtitle}
+            </p>
+          </motion.div>
 
           <div className="divide-y divide-border dark:divide-border/50">
             {portfolioItems.map((item, i) => (

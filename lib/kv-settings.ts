@@ -1,4 +1,3 @@
-import { Redis } from "@upstash/redis";
 import { SiteSettings } from "./site-settings";
 
 const SITE_SETTINGS_KEY = "site:settings";
@@ -7,21 +6,41 @@ const SITE_SETTINGS_KEY = "site:settings";
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 
-const kv = redisUrl && redisToken
-  ? new Redis({
+// Lazy load Redis client to avoid build-time import errors
+let kv: any = null;
+
+async function getRedisClient() {
+  if (kv !== null) {
+    return kv;
+  }
+
+  if (!redisUrl || !redisToken) {
+    return null;
+  }
+
+  try {
+    // Dynamic import to avoid build-time errors
+    const { Redis } = await import("@upstash/redis");
+    kv = new Redis({
       url: redisUrl,
       token: redisToken,
-    })
-  : null;
+    });
+    return kv;
+  } catch (error) {
+    console.warn("Failed to initialize Redis client:", error);
+    return null;
+  }
+}
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
-  if (!kv) {
+  const client = await getRedisClient();
+  if (!client) {
     console.warn("Redis not configured. Returning null for site settings.");
     return null;
   }
   
   try {
-    const settings = await kv.get<SiteSettings>(SITE_SETTINGS_KEY);
+    const settings = await client.get<SiteSettings>(SITE_SETTINGS_KEY);
     return settings;
   } catch (error) {
     console.error("KV get site settings error:", error);
@@ -30,13 +49,14 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
 }
 
 export async function setSiteSettings(settings: SiteSettings): Promise<boolean> {
-  if (!kv) {
+  const client = await getRedisClient();
+  if (!client) {
     console.error("Redis not configured. Cannot save site settings.");
     return false;
   }
   
   try {
-    await kv.set(SITE_SETTINGS_KEY, settings);
+    await client.set(SITE_SETTINGS_KEY, settings);
     return true;
   } catch (error) {
     console.error("KV set site settings error:", error);

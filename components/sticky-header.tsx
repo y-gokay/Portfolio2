@@ -11,23 +11,64 @@ export function StickyHeader() {
   const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { scrollY } = useScroll();
+
+  // Ensure client-side only rendering for navigation links to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
 
-  const navLinks = [
-    { label: t.footer.links[0].label, href: "#showcase" },
-    { label: t.footer.links[1].label, href: "#about" },
-    { label: t.footer.links[2].label, href: "#contact" },
+  // Use default translations until mounted to ensure SSR/client match
+  const navLinks = mounted ? [
+    { label: t.navigation?.home || "Ana Sayfa", href: "/#main-content" },
+    { label: t.navigation?.about || "Hakkımda", href: "/#about" },
+    { label: t.navigation?.skills || "Yetenekler", href: "/#skills" },
+    { label: t.navigation?.portfolio || "Portföy", href: "/#portfolio" },
+    { label: t.navigation?.research || "Projelerim", href: "/#research" },
+    { label: t.navigation?.awards || "Ödüller & Sergiler", href: "/#awards" },
+    { label: t.navigation?.resume || "Özgeçmiş", href: "/resume" },
+    { label: t.navigation?.contact || "İletişim", href: "/#contact" },
+  ] : [
+    { label: "Ana Sayfa", href: "/#main-content" },
+    { label: "Hakkımda", href: "/#about" },
+    { label: "Yetenekler", href: "/#skills" },
+    { label: "Portföy", href: "/#portfolio" },
+    { label: "Projelerim", href: "/#research" },
+    { label: "Ödüller & Sergiler", href: "/#awards" },
+    { label: "Özgeçmiş", href: "/resume" },
+    { label: "İletişim", href: "/#contact" },
   ];
 
   const handleLinkClick = (href: string) => {
     setIsMobileMenuOpen(false);
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+    if (href.startsWith("#")) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (href.startsWith("/#")) {
+      // Handle navigation to home page sections
+      if (typeof window !== "undefined") {
+        const hash = href.split("#")[1];
+        if (window.location.pathname === "/") {
+          const element = document.querySelector(`#${hash}`);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        } else {
+          window.location.href = href;
+        }
+      }
+    } else {
+      // External route navigation
+      if (typeof window !== "undefined") {
+        window.location.href = href;
+      }
     }
   };
 
@@ -71,7 +112,7 @@ export function StickyHeader() {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
               </a>
             ))}
-            
+
             {/* Desktop Toggle Buttons - Header içinde */}
             <div className="flex items-center gap-2 ml-2 lg:ml-4 pl-3 lg:pl-4 border-l border-border dark:border-border/50">
               <ThemeToggle isInHeader={true} />

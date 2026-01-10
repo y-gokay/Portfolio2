@@ -1,4 +1,3 @@
-import { Redis } from "@upstash/redis";
 import { PortfolioItem } from "./portfolio-data";
 
 const PORTFOLIO_KEY = "portfolio:items";
@@ -11,22 +10,41 @@ const PORTFOLIO_KEY = "portfolio:items";
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 
-// Redis client oluştur (sadece environment variable'lar varsa)
-const kv = redisUrl && redisToken
-  ? new Redis({
+// Lazy load Redis client to avoid build-time import errors
+let kv: any = null;
+
+async function getRedisClient() {
+  if (kv !== null) {
+    return kv;
+  }
+
+  if (!redisUrl || !redisToken) {
+    return null;
+  }
+
+  try {
+    // Dynamic import to avoid build-time errors
+    const { Redis } = await import("@upstash/redis");
+    kv = new Redis({
       url: redisUrl,
       token: redisToken,
-    })
-  : null;
+    });
+    return kv;
+  } catch (error) {
+    console.warn("Failed to initialize Redis client:", error);
+    return null;
+  }
+}
 
 export async function getPortfolioItems(): Promise<PortfolioItem[]> {
-  if (!kv) {
+  const client = await getRedisClient();
+  if (!client) {
     console.warn("Redis not configured. Returning empty array.");
     return [];
   }
   
   try {
-    const items = await kv.get<PortfolioItem[]>(PORTFOLIO_KEY);
+    const items = await client.get<PortfolioItem[]>(PORTFOLIO_KEY);
     return items || [];
   } catch (error) {
     console.error("KV get error:", error);
@@ -35,13 +53,14 @@ export async function getPortfolioItems(): Promise<PortfolioItem[]> {
 }
 
 export async function setPortfolioItems(items: PortfolioItem[]): Promise<boolean> {
-  if (!kv) {
+  const client = await getRedisClient();
+  if (!client) {
     console.error("Redis not configured. Cannot save items.");
     return false;
   }
   
   try {
-    await kv.set(PORTFOLIO_KEY, items);
+    await client.set(PORTFOLIO_KEY, items);
     return true;
   } catch (error) {
     console.error("KV set error:", error);

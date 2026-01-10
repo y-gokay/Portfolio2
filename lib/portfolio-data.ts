@@ -56,8 +56,7 @@ export const portfolioItems: PortfolioItem[] = [
       },
       {
         type: "image",
-        url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Example video URL
-        thumbnail: "/personal-branding-digital-marketing.jpg",
+        url: "/typography-trends-modern-fonts.jpg",
       },
     ],
     year: "2024",

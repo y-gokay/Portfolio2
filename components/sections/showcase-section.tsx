@@ -62,7 +62,7 @@ export function ShowcaseSection() {
   return (
     <>
       <section
-        id="showcase"
+        id="portfolio"
         ref={containerRef}
         className="bg-background px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden"
       >

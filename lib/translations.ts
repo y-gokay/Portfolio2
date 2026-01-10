@@ -59,7 +59,7 @@ export const translations = {
     },
     footer: {
       links: [
-        { label: "Portföy", href: "#showcase" },
+        { label: "Portföy", href: "#portfolio" },
         { label: "Hakkında", href: "#about" },
         { label: "İletişim", href: "#contact" },
       ],
@@ -73,6 +73,92 @@ export const translations = {
     modal: {
       videoError: "Video yüklenirken bir hata oluştu",
       retry: "Tekrar Dene",
+    },
+    about: {
+      title: "Hakkımda",
+      story: {
+        title: "Profesyonel Hikayem",
+        content:
+          "Grafik tasarım alanında eğitim alan bir öğrenci olarak, her projede yeni bir hikaye anlatmayı seviyorum. Tasarımın gücüne inanıyor ve her çalışmamda anlamlı bağlantılar kurmayı hedefliyorum.",
+      },
+      approach: {
+        title: "Yaklaşımım",
+        content:
+          "Yaratıcılık ve işlevselliği birleştirerek, kullanıcı deneyimini ön planda tutan tasarımlar oluşturuyorum. Her projede araştırma yaparak başlıyor, süreç boyunca deneyimleyerek ilerliyorum.",
+      },
+      interests: {
+        title: "İlgi Alanlarım",
+        items: [
+          "Tipografi ve Tip Tasarımı",
+          "Marka Kimliği ve Görsel Sistemler",
+          "Dijital Medya Tasarımı",
+          "Görsel İletişim",
+          "Renk Teorisi ve Uygulamaları",
+        ],
+      },
+    },
+    skills: {
+      title: "Yetenekler ve Araçlar",
+      expertise: {
+        title: "Uzmanlık Alanlarım",
+      },
+      tools: {
+        title: "Kullandığım Araçlar",
+        categories: {
+          design: {
+            title: "Tasarım",
+            items: [
+              "Adobe Photoshop",
+              "Adobe Illustrator",
+              "Adobe InDesign",
+              "Figma",
+              "Adobe XD",
+            ],
+          },
+          prototyping: {
+            title: "Prototipleme",
+            items: ["Figma", "Adobe XD", "Sketch"],
+          },
+          development: {
+            title: "Geliştirme",
+            items: ["HTML/CSS", "JavaScript", "React", "Next.js"],
+          },
+        },
+      },
+    },
+    research: {
+      title: "Projelerim",
+      subtitle: "Projeler listesi",
+    },
+    resume: {
+      title: "Özgeçmiş",
+      download: "CV İndir",
+      experience: {
+        title: "Deneyim",
+      },
+      education: {
+        title: "Eğitim",
+      },
+      summary: {
+        title: "Özet",
+      },
+    },
+    awards: {
+      title: "Ödüller & Sergiler",
+      subtitle: "Seçili başarılar ve sergiler",
+      awards: "Ödüller",
+      exhibitions: "Sergiler",
+      achievements: "Başarılar",
+    },
+    navigation: {
+      home: "Ana Sayfa",
+      about: "Hakkımda",
+      skills: "Yetenekler",
+      portfolio: "Portföy",
+      research: "Araştırma",
+      resume: "Özgeçmiş",
+      awards: "Ödüller",
+      contact: "İletişim",
     },
   },
   en: {
@@ -133,7 +219,7 @@ export const translations = {
     },
     footer: {
       links: [
-        { label: "Portfolio", href: "#showcase" },
+        { label: "Portfolio", href: "#portfolio" },
         { label: "About", href: "#about" },
         { label: "Contact", href: "#contact" },
       ],
@@ -147,6 +233,92 @@ export const translations = {
     modal: {
       videoError: "An error occurred while loading the video",
       retry: "Retry",
+    },
+    about: {
+      title: "About",
+      story: {
+        title: "Professional Story",
+        content:
+          "As a student in graphic design, I love telling a new story with each project. I believe in the power of design and aim to create meaningful connections in every work.",
+      },
+      approach: {
+        title: "My Approach",
+        content:
+          "By combining creativity and functionality, I create designs that prioritize user experience. I start each project with research and progress through experimentation throughout the process.",
+      },
+      interests: {
+        title: "My Interests",
+        items: [
+          "Typography and Type Design",
+          "Brand Identity and Visual Systems",
+          "Digital Media Design",
+          "Visual Communication",
+          "Color Theory and Applications",
+        ],
+      },
+    },
+    skills: {
+      title: "Skills & Tools",
+      expertise: {
+        title: "Areas of Expertise",
+      },
+      tools: {
+        title: "Tools I Use",
+        categories: {
+          design: {
+            title: "Design",
+            items: [
+              "Adobe Photoshop",
+              "Adobe Illustrator",
+              "Adobe InDesign",
+              "Figma",
+              "Adobe XD",
+            ],
+          },
+          prototyping: {
+            title: "Prototyping",
+            items: ["Figma", "Adobe XD", "Sketch"],
+          },
+          development: {
+            title: "Development",
+            items: ["HTML/CSS", "JavaScript", "React", "Next.js"],
+          },
+        },
+      },
+    },
+    research: {
+      title: "Projects",
+      subtitle: "Projects list",
+    },
+    resume: {
+      title: "Resume",
+      download: "Download CV",
+      experience: {
+        title: "Experience",
+      },
+      education: {
+        title: "Education",
+      },
+      summary: {
+        title: "Summary",
+      },
+    },
+    awards: {
+      title: "Awards & Exhibitions",
+      subtitle: "Selected achievements and exhibitions",
+      awards: "Awards",
+      exhibitions: "Exhibitions",
+      achievements: "Achievements",
+    },
+    navigation: {
+      home: "Home",
+      about: "About",
+      portfolio: "Portfolio",
+      skills: "Skills",
+      research: "Research",
+      resume: "Resume",
+      awards: "Awards",
+      contact: "Contact",
     },
   },
 } as const;

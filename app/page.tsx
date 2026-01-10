@@ -1,3 +1,5 @@
+"use client";
+
 import { LenisProvider } from "@/components/lenis-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SkipToContent } from "@/components/skip-to-content";
@@ -12,9 +14,28 @@ import { FeaturesSection } from "@/components/sections/features-section";
 import { ShowcaseSection } from "@/components/sections/showcase-section";
 import { CarouselSection } from "@/components/sections/carousel-section";
 import { InsightsSection } from "@/components/sections/insights-section";
+import { AwardsSection } from "@/components/sections/awards-section";
 import { FooterSection } from "@/components/sections/footer-section";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export default function Home() {
+  const { getSectionVisibility, loading } = useSiteSettings();
+
+  // Don't render sections until settings are loaded (to avoid flash)
+  if (loading) {
+    return (
+      <ErrorBoundary>
+        <LenisProvider>
+          <SkipToContent />
+          <StickyHeader />
+          <ScrollProgress />
+          <main id="main-content" className="bg-background min-h-screen" />
+          <BackToTop />
+        </LenisProvider>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <LenisProvider>
@@ -27,13 +48,14 @@ export default function Home() {
             <ThemeToggle />
             <LanguageToggle />
           </div>
-          <HeroSection />
-          <ManifestoSection />
-          <FeaturesSection />
-          <ShowcaseSection />
-          <CarouselSection />
-          <InsightsSection />
-          <FooterSection />
+          {getSectionVisibility("hero") && <HeroSection />}
+          {getSectionVisibility("about") && <ManifestoSection />}
+          {getSectionVisibility("skills") && <FeaturesSection />}
+          {getSectionVisibility("portfolio") && <ShowcaseSection />}
+          {getSectionVisibility("carousel") && <CarouselSection />}
+          {getSectionVisibility("research") && <InsightsSection />}
+          {getSectionVisibility("awards") && <AwardsSection />}
+          {getSectionVisibility("contact") && <FooterSection />}
         </main>
         <BackToTop />
       </LenisProvider>

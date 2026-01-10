@@ -9,28 +9,37 @@ export function useSiteSettings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const response = await fetch("/api/site-settings");
+        const result = await response.json();
+        if (result.success && result.data) {
+          setSettings(result.data);
+        } else {
+          // Fallback to default settings
+          setSettings(defaultSiteSettings);
+        }
+      } catch (error) {
+        console.error("Failed to fetch site settings:", error);
+        // Fallback to default settings
+        setSettings(defaultSiteSettings);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchSettings();
   }, []);
 
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch("/api/site-settings");
-      const result = await response.json();
-      if (result.success) {
-        setSettings(result.data);
-      } else {
-        // Fallback to default settings
-        setSettings(defaultSiteSettings);
-      }
-    } catch (error) {
-      console.error("Failed to fetch site settings:", error);
-      // Fallback to default settings
-      setSettings(defaultSiteSettings);
-    } finally {
-      setLoading(false);
-    }
+  // Get section visibility, defaulting to true if not set
+  const getSectionVisibility = (sectionKey: keyof SiteSettings["sectionVisibility"]): boolean => {
+    if (!settings?.sectionVisibility) return true;
+    return settings.sectionVisibility[sectionKey] ?? true;
   };
 
-  return { settings, loading, refetch: fetchSettings };
+  return {
+    settings,
+    loading,
+    getSectionVisibility,
+  };
 }
-
