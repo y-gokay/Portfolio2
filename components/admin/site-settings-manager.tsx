@@ -403,7 +403,7 @@ export function SiteSettingsManager() {
                       })
                     }
                     label=""
-                    placeholder="/minimal-architecture-portfolio-with-clean-lines.jpg"
+                    placeholder="/placeholder.svg veya https://..."
                     showPreview={true}
                   />
                 </div>
@@ -421,7 +421,7 @@ export function SiteSettingsManager() {
                       })
                     }
                     label=""
-                    placeholder="/fashion-photography-editorial-black-and-white.jpg"
+                    placeholder="/placeholder.svg veya https://..."
                     showPreview={true}
                   />
                 </div>
@@ -439,7 +439,7 @@ export function SiteSettingsManager() {
                       })
                     }
                     label=""
-                    placeholder="/modern-ui-design-portfolio-mockup.jpg"
+                    placeholder="/placeholder.svg veya https://..."
                     showPreview={true}
                   />
                 </div>

@@ -37,15 +37,13 @@ export function ImageUpload({
       body: formData,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Upload başarısız");
-    }
-
     const result = await response.json();
 
-    if (!result.success) {
-      throw new Error(result.error || "Upload başarısız");
+    if (!response.ok || !result.success) {
+      // Detaylı hata mesajını göster
+      const errorMessage = result.error || "Upload başarısız";
+      const errorDetails = result.details ? `\n\n${result.details}` : "";
+      throw new Error(`${errorMessage}${errorDetails}`);
     }
 
     return result.url;
@@ -86,9 +84,17 @@ export function ImageUpload({
       toast.success("Görsel başarıyla Cloudinary'ye yüklendi");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Upload başarısız"
-      );
+      const errorMessage = error instanceof Error ? error.message : "Upload başarısız";
+      
+      // Uzun hata mesajları için toast süresini artır
+      const duration = errorMessage.length > 100 ? 8000 : 5000;
+      
+      toast.error(errorMessage, {
+        duration,
+        description: errorMessage.includes("Cloudinary") 
+          ? "Vercel Dashboard > Settings > Environment Variables bölümünden Cloudinary bilgilerinizi kontrol edin."
+          : undefined,
+      });
     } finally {
       setIsUploading(false);
       setUploadProgress(0);

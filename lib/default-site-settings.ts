@@ -352,9 +352,9 @@ export const defaultSiteSettings: SiteSettings = {
     twitterImage: "/placeholder.svg", // TODO: Replace with actual Twitter image
   },
   heroImages: {
-    image1: "/minimal-architecture-portfolio-with-clean-lines.jpg",
-    image2: "/fashion-photography-editorial-black-and-white.jpg",
-    image3: "/modern-ui-design-portfolio-mockup.jpg",
+    image1: "/placeholder.svg",
+    image2: "/placeholder.svg",
+    image3: "/placeholder.svg",
   },
   cvUrl: "/cv.pdf",
   sectionVisibility: {
