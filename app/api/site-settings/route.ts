@@ -53,7 +53,7 @@ export async function PUT(request: Request) {
     const settings: SiteSettings = body;
     
     // Validation
-    if (!settings.translations || !settings.socialLinks || !settings.metadata) {
+    if (!settings.translations || !settings.socialLinks || !settings.metadata || !settings.heroImages) {
       return NextResponse.json(
         {
           success: false,

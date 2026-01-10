@@ -10,18 +10,21 @@ import {
 } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
-
-const images = [
-  "/minimal-architecture-portfolio-with-clean-lines.jpg",
-  "/fashion-photography-editorial-black-and-white.jpg",
-  "/modern-ui-design-portfolio-mockup.jpg",
-];
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { defaultSiteSettings } from "@/lib/default-site-settings";
 
 export function HeroSection() {
   const { t } = useLanguage();
+  const { settings } = useSiteSettings();
   const prefersReducedMotion = useReducedMotion() ?? false;
   const containerRef = useRef<HTMLDivElement>(null);
   const [hasScattered, setHasScattered] = useState(false);
+  
+  // Get hero images from KV or fallback to default
+  const heroImages = settings?.heroImages || defaultSiteSettings.heroImages;
+  const images = [heroImages.image1, heroImages.image2, heroImages.image3];
+  
+  const [isMobile, setIsMobile] = useState(false);
   const [image1Position, setImage1Position] = useState({
     x: -80,
     y: 0,
@@ -43,67 +46,87 @@ export function HeroSection() {
     offset: ["start start", "end start"],
   });
 
+  // Responsive kontrolü
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Scroll ile otomatik dağılma (sadece bir kez, geri birleşmez)
   useEffect(() => {
+    if (prefersReducedMotion) return;
+    
+    const dragLimit = isMobile ? 200 : 400;
+    
     const unsubscribe = scrollYProgress.on("change", (latest) => {
       // Scroll %30'u geçtiyse ve henüz dağılmadıysa
       if (latest > 0.3 && !hasScattered) {
         setHasScattered(true);
-        setImage1Position({ x: 400, y: 0, rotate: 15 });
-        setImage2Position({ x: -400, y: 0, rotate: -15 });
+        setImage1Position({ x: dragLimit, y: 0, rotate: 15 });
+        setImage2Position({ x: -dragLimit, y: 0, rotate: -15 });
         // image3 zaten arka planda kalıyor
       }
     });
 
     return () => unsubscribe();
-  }, [scrollYProgress, hasScattered]);
+  }, [scrollYProgress, hasScattered, prefersReducedMotion, isMobile]);
+
+  // Responsive image sizes and positions
+  const imageOffset = isMobile ? 40 : 80;
+  const dragLimit = isMobile ? 200 : 400;
 
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background px-6 py-24"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background px-4 sm:px-6 py-16 sm:py-24"
     >
       {/* Stacked images */}
-      <div className="relative flex flex-col items-center justify-center gap-8">
-        <div className="relative flex items-center justify-center">
+      <div className="relative flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 w-full max-w-7xl mx-auto px-4">
+        <div className="relative flex items-center justify-center w-full min-h-[300px] h-[300px] sm:min-h-[400px] sm:h-[400px] md:min-h-[500px] md:h-[500px] lg:min-h-[600px] lg:h-[600px]">
           {/* First Image - Draggable to Right */}
           <motion.div
-            className="absolute w-[280px] md:w-[320px] aspect-[3/4] rounded-xl overflow-hidden shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 cursor-grab active:cursor-grabbing z-10"
+            className={`absolute w-[140px] sm:w-[180px] md:w-[240px] lg:w-[280px] xl:w-[320px] aspect-[3/4] rounded-lg sm:rounded-xl overflow-hidden shadow-xl sm:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-10 ${
+              prefersReducedMotion ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+            }`}
             initial={{
               clipPath: "inset(100% 0 0 0)",
-              x: -80,
+              x: -imageOffset,
               y: 0,
-              rotate: -8,
+              rotate: prefersReducedMotion ? 0 : -8,
             }}
             animate={{
               clipPath: "inset(0 0 0 0)",
               x: image1Position.x,
               y: image1Position.y,
-              rotate: image1Position.rotate,
+              rotate: prefersReducedMotion ? 0 : image1Position.rotate,
             }}
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            drag="x"
-            dragConstraints={{ left: -400, right: 400 }}
+            drag={prefersReducedMotion || isMobile ? false : "x"}
+            dragConstraints={{ left: -dragLimit, right: dragLimit }}
             dragElastic={0.2}
-            whileDrag={{
+            whileDrag={prefersReducedMotion ? {} : {
               scale: 1.05,
               zIndex: 20,
               rotate: image1Position.rotate + 5,
             }}
             onDragEnd={(event, info) => {
+              if (prefersReducedMotion || isMobile) return;
               // Sağa doğru sürüklendiğinde
               if (info.offset.x > 50) {
-                setImage1Position({ x: 400, y: 0, rotate: 15 });
-                setHasScattered(true); // Manuel dağılma da işaretle
+                setImage1Position({ x: dragLimit, y: 0, rotate: 15 });
+                setHasScattered(true);
               } else if (info.offset.x < -50) {
-                // Sola geri döndüğünde - sadece henüz scroll ile dağılmadıysa
                 if (!hasScattered) {
-                  setImage1Position({ x: -80, y: 0, rotate: -8 });
+                  setImage1Position({ x: -imageOffset, y: 0, rotate: -8 });
                 }
               } else {
-                // Yeterince sürüklenmediyse - sadece henüz scroll ile dağılmadıysa geri dön
                 if (!hasScattered) {
-                  setImage1Position({ x: -80, y: 0, rotate: -8 });
+                  setImage1Position({ x: -imageOffset, y: 0, rotate: -8 });
                 }
               }
             }}
@@ -122,35 +145,36 @@ export function HeroSection() {
 
           {/* Second Image - Center, Draggable to Left */}
           <motion.div
-            className="relative w-[280px] md:w-[320px] aspect-[3/4] rounded-xl overflow-hidden shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 cursor-grab active:cursor-grabbing z-20"
+            className={`relative w-[140px] sm:w-[180px] md:w-[240px] lg:w-[280px] xl:w-[320px] aspect-[3/4] rounded-lg sm:rounded-xl overflow-hidden shadow-xl sm:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-20 ${
+              prefersReducedMotion ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+            }`}
             initial={{ clipPath: "inset(100% 0 0 0)", x: 0, y: 0, rotate: 0 }}
             animate={{
               clipPath: "inset(0 0 0 0)",
               x: image2Position.x,
               y: image2Position.y,
-              rotate: image2Position.rotate,
+              rotate: prefersReducedMotion ? 0 : image2Position.rotate,
             }}
             transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            drag="x"
-            dragConstraints={{ left: -400, right: 400 }}
+            drag={prefersReducedMotion || isMobile ? false : "x"}
+            dragConstraints={{ left: -dragLimit, right: dragLimit }}
             dragElastic={0.2}
-            whileDrag={{
+            whileDrag={prefersReducedMotion ? {} : {
               scale: 1.05,
               zIndex: 20,
               rotate: image2Position.rotate - 5,
             }}
             onDragEnd={(event, info) => {
+              if (prefersReducedMotion || isMobile) return;
               // Sola doğru sürüklendiğinde
               if (info.offset.x < -50) {
-                setImage2Position({ x: -400, y: 0, rotate: -15 });
-                setHasScattered(true); // Manuel dağılma da işaretle
+                setImage2Position({ x: -dragLimit, y: 0, rotate: -15 });
+                setHasScattered(true);
               } else if (info.offset.x > 50) {
-                // Sağa geri döndüğünde - sadece henüz scroll ile dağılmadıysa
                 if (!hasScattered) {
                   setImage2Position({ x: 0, y: 0, rotate: 0 });
                 }
               } else {
-                // Yeterince sürüklenmediyse - sadece henüz scroll ile dağılmadıysa geri dön
                 if (!hasScattered) {
                   setImage2Position({ x: 0, y: 0, rotate: 0 });
                 }
@@ -171,13 +195,13 @@ export function HeroSection() {
 
           {/* Third Image - Static Background */}
           <motion.div
-            className="absolute w-[280px] md:w-[320px] aspect-[3/4] rounded-xl overflow-hidden shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-0"
-            initial={{ clipPath: "inset(100% 0 0 0)", x: 80, y: 0, rotate: 8 }}
+            className="absolute w-[140px] sm:w-[180px] md:w-[240px] lg:w-[280px] xl:w-[320px] aspect-[3/4] rounded-lg sm:rounded-xl overflow-hidden shadow-xl sm:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-0 opacity-70 sm:opacity-80"
+            initial={{ clipPath: "inset(100% 0 0 0)", x: imageOffset, y: 0, rotate: prefersReducedMotion ? 0 : 8 }}
             animate={{
               clipPath: "inset(0 0 0 0)",
               x: image3Position.x,
               y: image3Position.y,
-              rotate: image3Position.rotate,
+              rotate: prefersReducedMotion ? 0 : image3Position.rotate,
             }}
             transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
             style={{ zIndex: 0 }}
@@ -196,44 +220,38 @@ export function HeroSection() {
 
         {/* Name and subtitle below images */}
         <motion.div
-          className="flex flex-col items-center justify-center pointer-events-none z-10 mt-8"
+          className="flex flex-col items-center justify-center pointer-events-none z-10 mt-4 sm:mt-6 md:mt-8 px-2 sm:px-4"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.8 }}
         >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-center text-foreground">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-serif text-center text-foreground leading-tight break-words">
             {t.hero.name}
           </h1>
-          <em className="font-serif italic text-3xl md:text-4xl lg:text-5xl text-foreground/80 mt-2">
+          <em className="font-serif italic text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-foreground/80 mt-1 sm:mt-2 text-center break-words px-2">
             {t.hero.subtitle}
           </em>
         </motion.div>
       </div>
 
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 sm:gap-2 z-10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.5, duration: 0.8 }}
       >
-        <motion.span
-          className="text-xs text-muted-foreground dark:text-foreground/60 uppercase tracking-wider font-medium"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 0.5 }}
-        ></motion.span>
         <motion.div
-          className="flex flex-col items-center gap-1"
-          animate={{ y: [0, 8, 0] }}
+          className="flex flex-col items-center gap-0.5 sm:gap-1"
+          animate={{ y: [0, 6, 0] }}
           transition={{
             duration: 1.5,
             repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
           }}
         >
-          <ChevronDown className="w-6 h-6 text-foreground/60 dark:text-foreground/70" />
+          <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-foreground/60 dark:text-foreground/70" />
           <ChevronDown
-            className="w-6 h-6 text-foreground/40 dark:text-foreground/50 -mt-3"
+            className="w-5 h-5 sm:w-6 sm:h-6 text-foreground/40 dark:text-foreground/50 -mt-2 sm:-mt-3"
             style={{ opacity: 0.5 }}
           />
         </motion.div>

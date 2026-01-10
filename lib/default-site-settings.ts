@@ -179,5 +179,10 @@ export const defaultSiteSettings: SiteSettings = {
     twitterHandle: "@ipekkokdemir",
     twitterImage: "/twitter-image.jpg",
   },
+  heroImages: {
+    image1: "/minimal-architecture-portfolio-with-clean-lines.jpg",
+    image2: "/fashion-photography-editorial-black-and-white.jpg",
+    image3: "/modern-ui-design-portfolio-mockup.jpg",
+  },
 };
 

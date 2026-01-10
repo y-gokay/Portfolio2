@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import Image from "next/image";
 
 interface ImageUploadProps {
   value: string;
@@ -23,20 +25,79 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload/cloudinary", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Upload başarısız");
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || "Upload başarısız");
+    }
+
+    return result.url;
+  };
 
   const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      alert("Sadece görsel dosyası yükleyebilirsiniz");
+      toast.error("Sadece görsel dosyası yükleyebilirsiniz");
       return;
     }
 
-    // Convert to base64
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      onChange(base64String);
-    };
-    reader.readAsDataURL(file);
+    // Dosya boyutu kontrolü (10 MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Dosya boyutu 10 MB'dan küçük olmalıdır");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Simüle edilmiş progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 100);
+
+      const url = await uploadToCloudinary(file);
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      onChange(url);
+      toast.success("Görsel başarıyla Cloudinary'ye yüklendi");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Upload başarısız"
+      );
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+
+      // File input'u temizle
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +120,8 @@ export function ImageUpload({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
+
+    const file = e.dataTransfer.files?.[0];
     if (file) {
       handleFileUpload(file);
     }
@@ -67,89 +129,109 @@ export function ImageUpload({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
+
+      {/* Drag & Drop Area */}
+      <div
+        className={`
+          border-2 border-dashed rounded-lg p-6 transition-colors
+          ${
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-muted-foreground/25 hover:border-muted-foreground/50"
+          }
+          ${isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+        `}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => !isUploading && fileInputRef.current?.click()}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          disabled={isUploading}
+          className="hidden"
+        />
+
+        <div className="flex flex-col items-center justify-center gap-2 text-center">
+          {isUploading ? (
+            <>
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Cloudinary'ye yükleniyor... {uploadProgress}%
+              </p>
+            </>
+          ) : (
+            <>
+              <Upload className="h-8 w-8 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">
+                  Tıklayarak seçin veya sürükleyip bırakın
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  PNG, JPG, WebP (Max: 10 MB)
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* URL Input (Manuel URL girişi için) */}
       <div className="flex gap-2">
         <Input
+          type="url"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          disabled={isUploading}
           className="flex-1"
         />
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          Yükle
-        </Button>
-      </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-
-      {showPreview && value && (
-        <div
-          className={`relative border-2 border-dashed rounded-lg overflow-hidden ${
-            isDragging ? "border-primary" : "border-border"
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className="relative">
-            <img
-              src={value}
-              alt="Preview"
-              className="w-full h-64 object-cover"
-            />
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2"
-              onClick={() => onChange("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          {isDragging && (
-            <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-              <p className="text-primary font-semibold">Bırakın</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {!value && (
-        <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center ${
-            isDragging ? "border-primary bg-primary/5" : "border-border"
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <ImageIcon className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground mb-2">
-            Görseli buraya sürükleyip bırakın veya URL girin
-          </p>
+        {value && (
           <Button
             type="button"
             variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
+            size="icon"
+            onClick={() => onChange("")}
+            disabled={isUploading}
           >
-            <Upload className="mr-2 h-4 w-4" />
-            Dosya Seç
+            <X className="h-4 w-4" />
           </Button>
+        )}
+      </div>
+
+      {/* Preview */}
+      {showPreview && value && (
+        <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+          <Image
+            src={value}
+            alt="Preview"
+            fill
+            className="object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
+            }}
+          />
+        </div>
+      )}
+
+      {/* Cloudinary Optimized URL Helper */}
+      {value && value.includes("cloudinary.com") && (
+        <div className="p-3 bg-muted rounded-lg">
+          <p className="text-xs text-muted-foreground mb-1">
+            💡 <strong>İpucu:</strong> Cloudinary URL'sine transformation parametreleri ekleyebilirsiniz:
+          </p>
+          <p className="text-xs font-mono break-all bg-background p-2 rounded mt-1">
+            {value.split("/upload/")[0]}/upload/w_800,h_600,c_fill,q_auto{fetch_format}/upload/{value.split("/upload/")[1]}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Örnek: <code>w_800</code> (genişlik), <code>h_600</code> (yükseklik), <code>c_fill</code> (crop), <code>q_auto</code> (kalite)
+          </p>
         </div>
       )}
     </div>
   );
 }
-

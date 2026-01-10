@@ -7,6 +7,7 @@ export interface SiteSettings {
   };
   socialLinks: SocialLink[];
   metadata: SiteMetadata;
+  heroImages: HeroImages;
 }
 
 export interface TranslationSet {
@@ -82,5 +83,11 @@ export interface SiteMetadata {
   ogImage: string;
   twitterHandle: string;
   twitterImage: string;
+}
+
+export interface HeroImages {
+  image1: string; // Left/First image
+  image2: string; // Center/Second image
+  image3: string; // Background/Third image
 }
 

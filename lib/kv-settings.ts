@@ -65,6 +65,7 @@ export async function updateSiteSettings(partialSettings: Partial<SiteSettings>)
         ...current.metadata,
         ...(partialSettings.metadata || {}),
       },
+      heroImages: partialSettings.heroImages || current.heroImages,
     };
     
     return await setSiteSettings(updated);
