@@ -231,10 +231,16 @@ export function ImageUpload({
             💡 <strong>İpucu:</strong> Cloudinary URL'sine transformation parametreleri ekleyebilirsiniz:
           </p>
           <p className="text-xs font-mono break-all bg-background p-2 rounded mt-1">
-            {value.split("/upload/")[0]}/upload/w_800,h_600,c_fill,q_auto{fetch_format}/upload/{value.split("/upload/")[1]}
+            {(() => {
+              const parts = value.split("/upload/");
+              if (parts.length >= 2) {
+                return `${parts[0]}/upload/w_800,h_600,c_fill,q_auto,f_auto/upload/${parts[1]}`;
+              }
+              return value;
+            })()}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Örnek: <code>w_800</code> (genişlik), <code>h_600</code> (yükseklik), <code>c_fill</code> (crop), <code>q_auto</code> (kalite)
+            Örnek: <code>w_800</code> (genişlik), <code>h_600</code> (yükseklik), <code>c_fill</code> (crop), <code>q_auto</code> (kalite), <code>f_auto</code> (format)
           </p>
         </div>
       )}

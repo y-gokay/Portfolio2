@@ -4,24 +4,63 @@ import { v2 as cloudinary } from "cloudinary";
 // Cloudinary SDK, CLOUDINARY_URL environment variable'ını otomatik olarak okur
 // Format: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
 export function configureCloudinary() {
-  const cloudinaryUrl = process.env.CLOUDINARY_URL?.trim();
+  const cloudinaryUrlRaw = process.env.CLOUDINARY_URL;
+  const cloudinaryUrl = cloudinaryUrlRaw?.trim();
   
-  // CLOUDINARY_URL varsa, Cloudinary SDK bunu otomatik kullanır
+  // CLOUDINARY_URL varsa, parse edip manuel config yap (boşlukları temizlemek için)
   if (cloudinaryUrl && cloudinaryUrl.startsWith("cloudinary://")) {
     try {
-      // CLOUDINARY_URL set edilmişse, config() parametresiz çağrılmalı
-      // SDK otomatik olarak CLOUDINARY_URL'den okuyacak
-      cloudinary.config();
+      // CLOUDINARY_URL'i parse et: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+      const urlMatch = cloudinaryUrl.match(/cloudinary:\/\/([^:]+):([^@]+)@(.+?)(?:\s|$)/);
       
-      // Config'in doğru yüklendiğini kontrol et
-      const config = cloudinary.config();
-      if (!config.cloud_name) {
-        console.error("Cloudinary config failed: cloud_name is missing");
+      if (urlMatch && urlMatch.length >= 4) {
+        const apiKey = urlMatch[1]?.trim();
+        const apiSecret = urlMatch[2]?.trim();
+        let cloudName = urlMatch[3]?.trim();
+        
+        // Cloud name'in sonundaki boşlukları temizle (regex sonunda kalan boşluklar için)
+        cloudName = cloudName.replace(/\s+$/, '').trim();
+        
+        // Validasyon
+        if (!cloudName || cloudName.length < 3 || cloudName === "Root") {
+          console.error(`Invalid cloud_name parsed from CLOUDINARY_URL: "${cloudName}"`);
+          return null;
+        }
+        
+        if (!apiKey || !apiSecret) {
+          console.error("Missing API key or secret in CLOUDINARY_URL");
+          return null;
+        }
+        
+        // Manuel config yap (boşlukları temizlenmiş değerlerle)
+        cloudinary.config({
+          cloud_name: cloudName,
+          api_key: apiKey,
+          api_secret: apiSecret,
+        });
+        
+        // Config'in doğru yüklendiğini kontrol et
+        const config = cloudinary.config();
+        const configuredCloudName = config.cloud_name;
+        
+        if (!configuredCloudName || configuredCloudName.trim() !== cloudName) {
+          console.error(`Config mismatch. Expected: "${cloudName}", Got: "${configuredCloudName}"`);
+          return null;
+        }
+        
+        // Son boşluk kontrolü
+        if (configuredCloudName !== configuredCloudName.trim()) {
+          console.error(`Cloudinary cloud_name still has spaces after config: "${configuredCloudName}"`);
+          return null;
+        }
+        
+        console.log(`Cloudinary configured successfully (cloud_name: "${configuredCloudName}")`);
+        return cloudinary;
+      } else {
+        console.error(`Failed to parse CLOUDINARY_URL. Format should be: cloudinary://API_KEY:API_SECRET@CLOUD_NAME`);
+        console.error(`Received URL (first 50 chars): ${cloudinaryUrl.substring(0, 50)}...`);
         return null;
       }
-      
-      console.log(`Cloudinary configured using CLOUDINARY_URL (cloud_name: ${config.cloud_name})`);
-      return cloudinary;
     } catch (error) {
       console.error("Failed to configure Cloudinary with CLOUDINARY_URL:", error);
       return null;
