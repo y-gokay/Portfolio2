@@ -90,25 +90,42 @@ export function SiteSettingsManager() {
     if (!settings.translations?.tr || !settings.translations?.en) {
       validationErrors.push("❌ Çeviri alanları eksik");
     }
-    if (!settings.metadata?.title || settings.metadata.title.trim() === "") {
-      validationErrors.push("❌ Site başlığı (metadata.title) boş olamaz");
-    }
-    if (!settings.metadata?.description || settings.metadata.description.trim() === "") {
-      validationErrors.push("❌ Site açıklaması (metadata.description) boş olamaz");
-    }
-    if (!Array.isArray(settings.heroImages) || settings.heroImages.length === 0) {
-      validationErrors.push("❌ En az bir hero görseli eklenmelidir");
+    
+    // metadata.title artık bir obje {default: string, template: string}
+    if (!settings.metadata?.title || typeof settings.metadata.title !== 'object') {
+      validationErrors.push("❌ Site başlığı (metadata.title) eksik veya geçersiz format");
+    } else {
+      if (!settings.metadata.title.default || typeof settings.metadata.title.default !== 'string' || settings.metadata.title.default.trim() === "") {
+        validationErrors.push("❌ Site başlığı varsayılan (metadata.title.default) boş olamaz");
+      }
+      if (!settings.metadata.title.template || typeof settings.metadata.title.template !== 'string' || settings.metadata.title.template.trim() === "") {
+        validationErrors.push("❌ Site başlığı şablonu (metadata.title.template) boş olamaz");
+      }
     }
     
-    // Hero görselleri kontrolü
-    settings.heroImages?.forEach((img, index) => {
-      if (!img.url || img.url.trim() === "") {
-        validationErrors.push(`❌ Hero görsel ${index + 1}: URL boş olamaz`);
-      }
-      if (!img.alt || img.alt.trim() === "") {
-        validationErrors.push(`❌ Hero görsel ${index + 1}: Alt text boş olamaz`);
-      }
-    });
+    if (!settings.metadata?.description || typeof settings.metadata.description !== 'string' || settings.metadata.description.trim() === "") {
+      validationErrors.push("❌ Site açıklaması (metadata.description) boş olamaz");
+    }
+    
+    // heroImages artık bir obje {image1: {url, alt}, image2: {url, alt}, image3: {url, alt}}
+    if (!settings.heroImages || typeof settings.heroImages !== 'object') {
+      validationErrors.push("❌ Hero görselleri eksik veya geçersiz format");
+    } else {
+      const heroImages = settings.heroImages as { image1?: { url?: string; alt?: string }; image2?: { url?: string; alt?: string }; image3?: { url?: string; alt?: string } };
+      const imageKeys = ['image1', 'image2', 'image3'] as const;
+      
+      imageKeys.forEach((key) => {
+        const img = heroImages[key];
+        if (img) {
+          if (!img.url || typeof img.url !== 'string' || img.url.trim() === "") {
+            validationErrors.push(`❌ Hero görsel ${key}: URL boş olamaz`);
+          }
+          if (!img.alt || typeof img.alt !== 'string' || img.alt.trim() === "") {
+            validationErrors.push(`❌ Hero görsel ${key}: Alt text boş olamaz`);
+          }
+        }
+      });
+    }
     
     // Social links kontrolü
     settings.socialLinks?.forEach((link, index) => {
