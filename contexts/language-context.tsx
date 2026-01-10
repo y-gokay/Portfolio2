@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Language, translations } from "@/lib/translations";
+import { SiteSettings } from "@/lib/site-settings";
+import { defaultSiteSettings } from "@/lib/default-site-settings";
 
 type LanguageContextType = {
   language: Language;
@@ -24,6 +26,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const [language, setLanguageState] = useState<Language>(getInitialLanguage);
   const [mounted, setMounted] = useState(false);
+  const [kvTranslations, setKvTranslations] = useState<SiteSettings["translations"] | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -31,6 +34,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== "undefined") {
       document.documentElement.lang = language;
     }
+
+    // Fetch translations from KV
+    fetch("/api/site-settings")
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success && result.data?.translations) {
+          setKvTranslations(result.data.translations);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch translations from KV:", error);
+      });
   }, []);
 
   const setLanguage = (lang: Language) => {
@@ -49,11 +64,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [language, mounted]);
 
+  // Use translations from KV if available, otherwise fallback to static
+  const translationsToUse = kvTranslations || translations;
+
   // Always provide context, even before mount
   const value = {
     language,
     setLanguage,
-    t: translations[language],
+    t: translationsToUse[language],
   };
 
   return (

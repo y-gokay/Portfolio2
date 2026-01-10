@@ -59,7 +59,12 @@ export async function POST(request: Request) {
           success: false,
           error: "Eksik alanlar var",
         },
-        { status: 400 }
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
       );
     }
     
@@ -71,13 +76,22 @@ export async function POST(request: Request) {
           success: false,
           error: "Portfolio öğesi eklenemedi",
         },
-        { status: 500 }
+        { 
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
       );
     }
     
     return NextResponse.json({
       success: true,
       message: "Portfolio öğesi eklendi",
+    }, {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
     });
   } catch (error) {
     console.error("Portfolio POST error:", error);
@@ -86,7 +100,12 @@ export async function POST(request: Request) {
         success: false,
         error: "Sunucu hatası",
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+      }
     );
   }
 }
@@ -102,7 +121,12 @@ export async function PUT(request: Request) {
           success: false,
           error: "ID gerekli",
         },
-        { status: 400 }
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
       );
     }
     
@@ -114,13 +138,22 @@ export async function PUT(request: Request) {
           success: false,
           error: "Portfolio öğesi bulunamadı veya güncellenemedi",
         },
-        { status: 404 }
+        { 
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
       );
     }
     
     return NextResponse.json({
       success: true,
       message: "Portfolio öğesi güncellendi",
+    }, {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
     });
   } catch (error) {
     console.error("Portfolio PUT error:", error);
@@ -129,7 +162,12 @@ export async function PUT(request: Request) {
         success: false,
         error: "Sunucu hatası",
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+      }
     );
   }
 }
@@ -145,7 +183,12 @@ export async function DELETE(request: Request) {
           success: false,
           error: "ID gerekli",
         },
-        { status: 400 }
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
       );
     }
     
@@ -157,13 +200,22 @@ export async function DELETE(request: Request) {
           success: false,
           error: "Portfolio öğesi bulunamadı veya silinemedi",
         },
-        { status: 404 }
+        { 
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
       );
     }
     
     return NextResponse.json({
       success: true,
       message: "Portfolio öğesi silindi",
+    }, {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
     });
   } catch (error) {
     console.error("Portfolio DELETE error:", error);
@@ -172,7 +224,12 @@ export async function DELETE(request: Request) {
         success: false,
         error: "Sunucu hatası",
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+      }
     );
   }
 }

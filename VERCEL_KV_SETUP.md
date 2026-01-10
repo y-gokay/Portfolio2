@@ -63,6 +63,8 @@ Bu değerleri almak için:
 
 Mevcut statik verileri KV'ye yüklemek için:
 
+### Portfolio Verileri Migration
+
 1. Vercel'e deploy edin
 2. Deploy sonrası şu URL'yi ziyaret edin:
    ```
@@ -73,7 +75,20 @@ Mevcut statik verileri KV'ye yüklemek için:
    curl -X POST https://your-domain.vercel.app/api/portfolio/migrate
    ```
 
-**Not:** Bu migration route'u sadece bir kez çalıştırılmalıdır.
+### Site Settings Migration (Tüm Metinler, Linkler, SEO)
+
+1. Deploy sonrası şu URL'yi ziyaret edin:
+   ```
+   https://your-domain.vercel.app/api/site-settings/migrate
+   ```
+2. Veya terminalden:
+   ```bash
+   curl -X POST https://your-domain.vercel.app/api/site-settings/migrate
+   ```
+
+**Not:** Bu migration route'ları sadece bir kez çalıştırılmalıdır. Migration'ları sırayla çalıştırın:
+1. Önce portfolio migration'ı
+2. Sonra site settings migration'ı
 
 ## 5. Admin Paneli Kullanımı
 
@@ -82,10 +97,45 @@ Admin paneline erişmek için:
 https://your-domain.vercel.app/admin
 ```
 
-Admin panelinden:
+Admin panelinde 2 ana bölüm var:
+
+### Portfolio Yönetimi
 - ✅ Yeni portfolio öğeleri ekleyebilirsiniz
 - ✅ Mevcut öğeleri düzenleyebilirsiniz
 - ✅ Öğeleri silebilirsiniz
+- ✅ Her öğe için Türkçe/İngilizce içerik ekleyebilirsiniz
+
+### Site Ayarları
+**Hero & Manifesto:**
+- Hero section metinleri (isim, alt başlık)
+- Manifesto başlık ve açıklama
+- Tüm metinler için TR/EN versiyonları
+
+**Yetenekler (Features):**
+- Bölüm başlığı
+- Tipografi, Düzen, Renk için başlık ve açıklamalar
+- TR/EN versiyonları
+
+**Footer:**
+- İletişim bilgileri (başlık, email, rol)
+- Telif hakkı metni
+- Footer linkleri
+- TR/EN versiyonları
+
+**Sosyal Medya:**
+- Sosyal medya linkleri ekleme/düzenleme/silme
+- Instagram, YouTube, LinkedIn, Email, Twitter, Facebook, GitHub desteği
+- Link aktif/pasif yapma
+- Sıralama (order) ayarlama
+
+**SEO & Metadata:**
+- Site başlığı ve şablonu
+- Site açıklaması
+- Anahtar kelimeler
+- Yazar bilgisi
+- Open Graph image
+- Twitter handle ve image
+
 - ✅ Tüm değişiklikler anında sitede görünür
 
 ## 6. Güvenlik

@@ -1,160 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Edit, Trash2, Save, X, Upload, LogOut } from "lucide-react";
-import { PortfolioItem } from "@/lib/portfolio-data";
+import { LogOut, FolderKanban, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PortfolioManager } from "@/components/admin/portfolio-manager";
+import { SiteSettingsManager } from "@/components/admin/site-settings-manager";
 
 export default function AdminPage() {
   const router = useRouter();
-  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null);
-  const [formData, setFormData] = useState<Partial<PortfolioItem>>({
-    id: "",
-    title: { tr: "", en: "" },
-    category: { tr: "", en: "" },
-    description: { tr: "", en: "" },
-    image: "",
-    year: new Date().getFullYear().toString(),
-    tags: { tr: [], en: [] },
-    media: [],
-  });
-
-  useEffect(() => {
-    fetchPortfolio();
-  }, []);
-
-  const fetchPortfolio = async () => {
-    try {
-      const response = await fetch("/api/portfolio");
-      const result = await response.json();
-      if (result.success) {
-        setPortfolioItems(result.data);
-      }
-    } catch (error) {
-      toast.error("Portfolio verileri yüklenemedi");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAdd = () => {
-    const newId = Date.now().toString();
-    setFormData({
-      id: newId,
-      title: { tr: "", en: "" },
-      category: { tr: "", en: "" },
-      description: { tr: "", en: "" },
-      image: "",
-      year: new Date().getFullYear().toString(),
-      tags: { tr: [], en: [] },
-      media: [],
-    });
-    setEditingItem(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleEdit = (item: PortfolioItem) => {
-    setEditingItem(item);
-    setFormData(item);
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) return;
-
-    try {
-      const response = await fetch(`/api/portfolio?id=${id}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        toast.success("Portfolio öğesi silindi");
-        fetchPortfolio();
-      } else {
-        toast.error(result.error || "Silme işlemi başarısız");
-      }
-    } catch (error) {
-      toast.error("Bir hata oluştu");
-    }
-  };
-
-  const handleSave = async () => {
-    if (!formData.id || !formData.title?.tr || !formData.category?.tr) {
-      toast.error("Lütfen tüm gerekli alanları doldurun");
-      return;
-    }
-
-    try {
-      const method = editingItem ? "PUT" : "POST";
-      const response = await fetch("/api/portfolio", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast.success(editingItem ? "Güncellendi" : "Eklendi");
-        setIsDialogOpen(false);
-        fetchPortfolio();
-      } else {
-        toast.error(result.error || "İşlem başarısız");
-      }
-    } catch (error) {
-      toast.error("Bir hata oluştu");
-    }
-  };
-
-  const handleTagsChange = (
-    lang: "tr" | "en",
-    value: string
-  ) => {
-    const tags = value.split(",").map((t) => t.trim()).filter(Boolean);
-    setFormData({
-      ...formData,
-      tags: {
-        ...formData.tags,
-        [lang]: tags,
-      },
-    });
-  };
 
   const handleLogout = () => {
     sessionStorage.removeItem("admin_authenticated");
     router.push("/");
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Yükleniyor...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Portfolio Yönetimi</h1>
+          <h1 className="text-3xl font-bold">Site Yönetim Paneli</h1>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => router.push("/")}>
               Ana Sayfa
@@ -163,246 +28,30 @@ export default function AdminPage() {
               <LogOut className="mr-2 h-4 w-4" />
               Çıkış Yap
             </Button>
-            <Button onClick={handleAdd}>
-              <Plus className="mr-2 h-4 w-4" />
-              Yeni Ekle
-            </Button>
           </div>
         </div>
 
-        <div className="grid gap-4">
-          {portfolioItems.map((item) => (
-            <Card key={item.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.title.tr}
-                      className="w-32 h-32 object-cover rounded-lg"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-2">
-                      {item.title.tr}
-                    </h3>
-                    <p className="text-muted-foreground mb-2">
-                      {item.category.tr} • {item.year}
-                    </p>
-                    <p className="text-sm mb-4 line-clamp-2">
-                      {item.description.tr}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(item)}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Düzenle
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Sil
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Tabs defaultValue="portfolio" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="portfolio">
+              <FolderKanban className="mr-2 h-4 w-4" />
+              Portfolio
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings className="mr-2 h-4 w-4" />
+              Site Ayarları
+            </TabsTrigger>
+          </TabsList>
 
-        {portfolioItems.length === 0 && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <p className="text-muted-foreground mb-4">
-                Henüz portfolio öğesi yok
-              </p>
-              <Button onClick={handleAdd}>
-                <Plus className="mr-2 h-4 w-4" />
-                İlk Öğeyi Ekle
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+          <TabsContent value="portfolio" className="mt-6">
+            <PortfolioManager />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-6">
+            <SiteSettingsManager />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingItem ? "Portfolio Düzenle" : "Yeni Portfolio Ekle"}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {/* ID */}
-            <div>
-              <Label>ID</Label>
-              <Input
-                value={formData.id}
-                onChange={(e) =>
-                  setFormData({ ...formData, id: e.target.value })
-                }
-                placeholder="benzersiz-id"
-              />
-            </div>
-
-            {/* Turkish Title */}
-            <div>
-              <Label>Başlık (TR) *</Label>
-              <Input
-                value={formData.title?.tr || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    title: { ...formData.title, tr: e.target.value, en: formData.title?.en || "" },
-                  })
-                }
-                placeholder="Türkçe başlık"
-              />
-            </div>
-
-            {/* English Title */}
-            <div>
-              <Label>Title (EN) *</Label>
-              <Input
-                value={formData.title?.en || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    title: { ...formData.title, en: e.target.value, tr: formData.title?.tr || "" },
-                  })
-                }
-                placeholder="English title"
-              />
-            </div>
-
-            {/* Category */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Kategori (TR) *</Label>
-                <Input
-                  value={formData.category?.tr || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      category: { ...formData.category, tr: e.target.value, en: formData.category?.en || "" },
-                    })
-                  }
-                  placeholder="Tasarım"
-                />
-              </div>
-              <div>
-                <Label>Category (EN) *</Label>
-                <Input
-                  value={formData.category?.en || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      category: { ...formData.category, en: e.target.value, tr: formData.category?.tr || "" },
-                    })
-                  }
-                  placeholder="Design"
-                />
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Açıklama (TR)</Label>
-                <Textarea
-                  value={formData.description?.tr || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      description: { ...formData.description, tr: e.target.value, en: formData.description?.en || "" },
-                    })
-                  }
-                  placeholder="Türkçe açıklama"
-                  rows={4}
-                />
-              </div>
-              <div>
-                <Label>Description (EN)</Label>
-                <Textarea
-                  value={formData.description?.en || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      description: { ...formData.description, en: e.target.value, tr: formData.description?.tr || "" },
-                    })
-                  }
-                  placeholder="English description"
-                  rows={4}
-                />
-              </div>
-            </div>
-
-            {/* Image */}
-            <div>
-              <Label>Ana Görsel URL</Label>
-              <Input
-                value={formData.image || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, image: e.target.value })
-                }
-                placeholder="/image.jpg veya https://..."
-              />
-            </div>
-
-            {/* Year */}
-            <div>
-              <Label>Yıl</Label>
-              <Input
-                type="text"
-                value={formData.year || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, year: e.target.value })
-                }
-                placeholder="2024"
-              />
-            </div>
-
-            {/* Tags */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Etiketler (TR) - virgülle ayırın</Label>
-                <Input
-                  value={formData.tags?.tr?.join(", ") || ""}
-                  onChange={(e) => handleTagsChange("tr", e.target.value)}
-                  placeholder="Tasarım, Tipografi, Renk"
-                />
-              </div>
-              <div>
-                <Label>Tags (EN) - separate with commas</Label>
-                <Input
-                  value={formData.tags?.en?.join(", ") || ""}
-                  onChange={(e) => handleTagsChange("en", e.target.value)}
-                  placeholder="Design, Typography, Color"
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              <X className="mr-2 h-4 w-4" />
-              İptal
-            </Button>
-            <Button onClick={handleSave}>
-              <Save className="mr-2 h-4 w-4" />
-              Kaydet
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
