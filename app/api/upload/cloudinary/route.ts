@@ -1,24 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { cloudinaryClient } from "@/lib/cloudinary";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
+    // Cloudinary client kontrolü
+    if (!cloudinaryClient) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Cloudinary yapılandırılmamış. Environment variables'ları kontrol edin.",
+        },
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+          },
+        }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
     if (!file) {
       return NextResponse.json(
         { success: false, error: "Dosya bulunamadı" },
-        { 
+        {
           status: 400,
           headers: {
             "Content-Type": "application/json; charset=utf-8",
@@ -59,7 +69,12 @@ export async function POST(request: NextRequest) {
 
     // Cloudinary'ye upload
     const uploadResult = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
+      if (!cloudinaryClient) {
+        reject(new Error("Cloudinary client not configured"));
+        return;
+      }
+
+      const uploadStream = cloudinaryClient.uploader.upload_stream(
         {
           folder: "portfolio",
           resource_type: "auto", // auto-detect image/video
