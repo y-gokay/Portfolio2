@@ -45,9 +45,24 @@ export function PortfolioManager() {
       const result = await response.json();
       if (result.success) {
         setPortfolioItems(result.data);
+      } else {
+        const errorMessage = result.error || "Portfolio verileri yüklenemedi";
+        const detailsMessage = result.details 
+          ? `\n\nDetaylar: ${Array.isArray(result.details) ? result.details.join('\n') : result.details}`
+          : '';
+        toast.error(`${errorMessage}${detailsMessage}`, {
+          duration: 10000,
+        });
+        console.error("Portfolio fetch error:", result);
       }
     } catch (error) {
-      toast.error("Portfolio verileri yüklenemedi");
+      const errorMessage = error instanceof Error 
+        ? `Bağlantı hatası: ${error.message}` 
+        : "Portfolio verileri yüklenemedi";
+      toast.error(errorMessage, {
+        duration: 10000,
+      });
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -88,16 +103,69 @@ export function PortfolioManager() {
         toast.success("Portfolio öğesi silindi");
         fetchPortfolio();
       } else {
-        toast.error(result.error || "Silme işlemi başarısız");
+        let errorMessage = result.error || "Silme işlemi başarısız";
+        if (result.details && Array.isArray(result.details) && result.details.length > 0) {
+          errorMessage = `${errorMessage}\n\nDetaylar: ${result.details.join('\n')}`;
+        }
+        toast.error(errorMessage, {
+          duration: 10000,
+        });
+        console.error("Delete error:", result);
       }
     } catch (error) {
-      toast.error("Bir hata oluştu");
+      const errorMessage = error instanceof Error 
+        ? `Bağlantı hatası: ${error.message}` 
+        : "Bilinmeyen bir hata oluştu";
+      toast.error(errorMessage, {
+        duration: 10000,
+      });
+      console.error("Delete error:", error);
     }
   };
 
   const handleSave = async () => {
-    if (!formData.id || !formData.title?.tr || !formData.category?.tr) {
-      toast.error("Lütfen tüm gerekli alanları doldurun");
+    // Detaylı client-side validasyon
+    const errors: string[] = [];
+    
+    if (!formData.id || formData.id.trim() === "") {
+      errors.push("❌ ID boş olamaz");
+    }
+    
+    if (!formData.title?.tr || formData.title.tr.trim() === "") {
+      errors.push("❌ Türkçe başlık (title.tr) boş olamaz");
+    }
+    if (!formData.title?.en || formData.title.en.trim() === "") {
+      errors.push("❌ İngilizce başlık (title.en) boş olamaz");
+    }
+    
+    if (!formData.category?.tr || formData.category.tr.trim() === "") {
+      errors.push("❌ Türkçe kategori (category.tr) boş olamaz");
+    }
+    if (!formData.category?.en || formData.category.en.trim() === "") {
+      errors.push("❌ İngilizce kategori (category.en) boş olamaz");
+    }
+    
+    if (!formData.description?.tr || formData.description.tr.trim() === "") {
+      errors.push("❌ Türkçe açıklama (description.tr) boş olamaz");
+    }
+    if (!formData.description?.en || formData.description.en.trim() === "") {
+      errors.push("❌ İngilizce açıklama (description.en) boş olamaz");
+    }
+    
+    if (!formData.image || formData.image.trim() === "") {
+      errors.push("❌ Ana görsel (image) URL'i boş olamaz");
+    }
+    
+    if (!formData.year || formData.year.trim() === "") {
+      errors.push("❌ Yıl (year) boş olamaz");
+    }
+    
+    if (errors.length > 0) {
+      const errorMessage = `Validasyon hatası (${errors.length} hata):\n\n${errors.slice(0, 10).join('\n')}${errors.length > 10 ? `\n\n...ve ${errors.length - 10} hata daha` : ''}`;
+      toast.error(errorMessage, {
+        duration: 10000,
+      });
+      console.error("Portfolio Validasyon Hataları:", errors);
       return;
     }
 
@@ -112,14 +180,32 @@ export function PortfolioManager() {
       const result = await response.json();
 
       if (result.success) {
-        toast.success(editingItem ? "Güncellendi" : "Eklendi");
+        toast.success(editingItem ? "Portfolio öğesi güncellendi" : "Portfolio öğesi eklendi");
         setIsDialogOpen(false);
         fetchPortfolio();
       } else {
-        toast.error(result.error || "İşlem başarısız");
+        // Detaylı hata mesajı göster
+        let errorMessage = result.error || "İşlem başarısız";
+        
+        if (result.details && Array.isArray(result.details) && result.details.length > 0) {
+          const detailsText = result.details.slice(0, 10).join('\n');
+          const moreText = result.details.length > 10 ? `\n\n...ve ${result.details.length - 10} hata daha` : '';
+          errorMessage = `${errorMessage}\n\nHata Detayları (${result.errorCount || result.details.length} hata):\n${detailsText}${moreText}`;
+          console.error("Sunucu Validasyon Hataları:", result.details);
+        }
+        
+        toast.error(errorMessage, {
+          duration: 15000,
+        });
       }
     } catch (error) {
-      toast.error("Bir hata oluştu");
+      const errorMessage = error instanceof Error 
+        ? `Bağlantı hatası: ${error.message}` 
+        : "Bilinmeyen bir hata oluştu";
+      toast.error(errorMessage, {
+        duration: 10000,
+      });
+      console.error("Save error:", error);
     }
   };
 

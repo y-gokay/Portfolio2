@@ -1,6 +1,10 @@
 import { PortfolioItem } from "./portfolio-data";
+import { AwardsData } from "./awards-data";
+import { ResumeData } from "./resume-data";
 
 const PORTFOLIO_KEY = "portfolio:items";
+const AWARDS_KEY = "awards:data";
+const RESUME_KEY = "resume:data";
 
 // Upstash Redis client oluştur
 // Environment variable'lar Upstash tarafından otomatik olarak eklenir:
@@ -103,3 +107,68 @@ export async function deletePortfolioItem(id: string): Promise<boolean> {
   }
 }
 
+// Awards Functions
+export async function getAwardsData(): Promise<AwardsData> {
+  const client = await getRedisClient();
+  if (!client) {
+    console.warn("Redis not configured. Returning empty awards data.");
+    return { awards: [], exhibitions: [] };
+  }
+  
+  try {
+    const data = await client.get<AwardsData>(AWARDS_KEY);
+    return data || { awards: [], exhibitions: [] };
+  } catch (error) {
+    console.error("KV get awards error:", error);
+    return { awards: [], exhibitions: [] };
+  }
+}
+
+export async function setAwardsData(data: AwardsData): Promise<boolean> {
+  const client = await getRedisClient();
+  if (!client) {
+    console.error("Redis not configured. Cannot save awards data.");
+    return false;
+  }
+  
+  try {
+    await client.set(AWARDS_KEY, data);
+    return true;
+  } catch (error) {
+    console.error("KV set awards error:", error);
+    return false;
+  }
+}
+
+// Resume Functions
+export async function getResumeData(): Promise<ResumeData | null> {
+  const client = await getRedisClient();
+  if (!client) {
+    console.warn("Redis not configured. Returning null.");
+    return null;
+  }
+  
+  try {
+    const data = await client.get<ResumeData>(RESUME_KEY);
+    return data || null;
+  } catch (error) {
+    console.error("KV get resume error:", error);
+    return null;
+  }
+}
+
+export async function setResumeData(data: ResumeData): Promise<boolean> {
+  const client = await getRedisClient();
+  if (!client) {
+    console.error("Redis not configured. Cannot save resume data.");
+    return false;
+  }
+  
+  try {
+    await client.set(RESUME_KEY, data);
+    return true;
+  } catch (error) {
+    console.error("KV set resume error:", error);
+    return false;
+  }
+}

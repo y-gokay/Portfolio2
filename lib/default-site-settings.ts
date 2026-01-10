@@ -347,15 +347,16 @@ export const defaultSiteSettings: SiteSettings = {
     ],
     author: "İpek Kökdemir",
     siteName: "İpek Kökdemir",
-    ogImage: "/og-image.jpg",
+    ogImage: "/placeholder.svg", // TODO: Replace with actual OG image
     twitterHandle: "@ipekkokdemir",
-    twitterImage: "/twitter-image.jpg",
+    twitterImage: "/placeholder.svg", // TODO: Replace with actual Twitter image
   },
   heroImages: {
     image1: "/minimal-architecture-portfolio-with-clean-lines.jpg",
     image2: "/fashion-photography-editorial-black-and-white.jpg",
     image3: "/modern-ui-design-portfolio-mockup.jpg",
   },
+  cvUrl: "/cv.pdf",
   sectionVisibility: {
     hero: true,
     about: true,

@@ -4,9 +4,12 @@ import { useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import { useSiteSettings } from "@/hooks/use-site-settings"
+import { defaultSiteSettings } from "@/lib/default-site-settings"
 
 export function ManifestoSection() {
   const { t } = useLanguage()
+  const { settings } = useSiteSettings()
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -16,6 +19,9 @@ export function ManifestoSection() {
   const clipPath = useTransform(scrollYProgress, [0.2, 0.6], ["inset(0 100% 0 0)", "inset(0 0% 0 0)"])
   
   const titleLines = t.manifesto.title.split("\n")
+  
+  // Get CV URL from KV or fallback to default
+  const cvUrl = settings?.cvUrl || defaultSiteSettings.cvUrl || "/cv.pdf"
 
   return (
     <section
@@ -117,13 +123,18 @@ export function ManifestoSection() {
             transition={{ delay: 0.8 }}
           >
             <a
-              href="/cv.pdf"
+              href={cvUrl}
               download
               className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg sm:rounded-xl hover:bg-primary/90 transition-colors shadow-sm dark:shadow-lg dark:shadow-primary/20 font-medium text-sm sm:text-base"
               onClick={(e) => {
+                // Eğer URL bir external URL ise, yeni sekmede aç
+                if (cvUrl.startsWith("http")) {
+                  e.preventDefault();
+                  window.open(cvUrl, "_blank");
+                  return;
+                }
                 // Eğer PDF dosyası yoksa, resume sayfasına yönlendir
-                // Bu kontrolü yapmak için fetch ile kontrol edebiliriz
-                fetch("/cv.pdf", { method: "HEAD" })
+                fetch(cvUrl, { method: "HEAD" })
                   .then((res) => {
                     if (!res.ok) {
                       e.preventDefault();

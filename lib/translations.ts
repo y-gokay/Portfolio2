@@ -34,28 +34,6 @@ export const translations = {
     },
     insights: {
       label: "Projeler",
-      projects: [
-        {
-          title: "Görsel Hikaye Anlatımı",
-          category: "Tasarım",
-          image: "/visual-storytelling-design-article.jpg",
-        },
-        {
-          title: "Tipografi Projeleri",
-          category: "Tipografi",
-          image: "/typography-trends-modern-fonts.jpg",
-        },
-        {
-          title: "Marka Kimliği Tasarımı",
-          category: "Marka",
-          image: "/personal-branding-digital-marketing.jpg",
-        },
-        {
-          title: "Düzen Tasarımı Çalışmaları",
-          category: "Düzen",
-          image: "/placeholder.svg?height=200&width=300",
-        },
-      ],
     },
     footer: {
       links: [
@@ -194,28 +172,6 @@ export const translations = {
     },
     insights: {
       label: "Projects",
-      projects: [
-        {
-          title: "Visual Storytelling",
-          category: "Design",
-          image: "/visual-storytelling-design-article.jpg",
-        },
-        {
-          title: "Typography Projects",
-          category: "Typography",
-          image: "/typography-trends-modern-fonts.jpg",
-        },
-        {
-          title: "Brand Identity Design",
-          category: "Brand",
-          image: "/personal-branding-digital-marketing.jpg",
-        },
-        {
-          title: "Layout Design Works",
-          category: "Layout",
-          image: "/placeholder.svg?height=200&width=300",
-        },
-      ],
     },
     footer: {
       links: [

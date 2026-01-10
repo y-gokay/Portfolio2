@@ -5,115 +5,31 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/language-context";
 import { Award, Trophy, Star, ChevronDown, ChevronUp } from "lucide-react";
 import { AwardExhibitionModal } from "@/components/award-exhibition-modal";
-
-type AwardItem = {
-  id: number;
-  title: string;
-  organization: string;
-  year: string;
-  category: string;
-  description?: string;
-};
-
-type ExhibitionItem = {
-  id: number;
-  title: string;
-  location: string;
-  year: string;
-  description?: string;
-};
+import { useAwards } from "@/hooks/use-awards";
+import { AwardItem, ExhibitionItem } from "@/lib/awards-data";
 
 export function AwardsSection() {
   const { t, language } = useLanguage();
+  const { awardsData, loading, error } = useAwards();
   const [showAllAwards, setShowAllAwards] = useState(false);
   const [showAllExhibitions, setShowAllExhibitions] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{ item: AwardItem | ExhibitionItem; type: "award" | "exhibition" } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Sample awards data - this should come from a data source in production
-  const awards: AwardItem[] = [
-    {
-      id: 1,
-      title: language === "tr" ? "En İyi Tasarım Öğrencisi Ödülü" : "Best Design Student Award",
-      organization: language === "tr" ? "Üniversite Grafik Tasarım Bölümü" : "University Graphic Design Department",
-      year: "2024",
-      category: "academic",
-      description: language === "tr" 
-        ? "Grafik tasarım bölümünde akademik başarı ve yaratıcı çalışmalarım nedeniyle bu ödüle layık görüldüm." 
-        : "I was awarded this prize for my academic achievements and creative work in the graphic design department.",
-    },
-    {
-      id: 2,
-      title: language === "tr" ? "Tipografi Yarışması Birincilik" : "Typography Competition First Place",
-      organization: language === "tr" ? "Ulusal Tasarım Festivali" : "National Design Festival",
-      year: "2023",
-      category: "competition",
-      description: language === "tr" 
-        ? "Tipografi alanındaki yaratıcı yaklaşımım ve teknik yetkinliğim ile birincilik ödülünü kazandım." 
-        : "I won first place with my creative approach and technical competence in typography.",
-    },
-    {
-      id: 3,
-      title: language === "tr" ? "Yılın Genç Tasarımcısı" : "Young Designer of the Year",
-      organization: language === "tr" ? "Yerel Tasarım Derneği" : "Local Design Association",
-      year: "2023",
-      category: "recognition",
-    },
-    {
-      id: 4,
-      title: language === "tr" ? "Yaratıcı Tasarım Ödülü" : "Creative Design Award",
-      organization: language === "tr" ? "Dijital Tasarım Ajansı" : "Digital Design Agency",
-      year: "2022",
-      category: "competition",
-      description: language === "tr" 
-        ? "Yaratıcı ve yenilikçi tasarım çalışmalarım nedeniyle bu ödüle layık görüldüm." 
-        : "I was awarded this prize for my creative and innovative design work.",
-    },
-    {
-      id: 5,
-      title: language === "tr" ? "En İyi Portföy Tasarımı" : "Best Portfolio Design",
-      organization: language === "tr" ? "Web Tasarım Yarışması" : "Web Design Competition",
-      year: "2022",
-      category: "competition",
-    },
-  ];
-
-  const exhibitions: ExhibitionItem[] = [
-    {
-      id: 1,
-      title: language === "tr" ? "Öğrenci Tasarım Sergisi" : "Student Design Exhibition",
-      location: language === "tr" ? "Üniversite Galerisi, İstanbul" : "University Gallery, Istanbul",
-      year: "2024",
-      description: language === "tr" 
-        ? "Öğrenci çalışmalarının sergilendiği bu etkinlikte, tipografi ve görsel iletişim projelerim yer aldı." 
-        : "My typography and visual communication projects were featured in this event showcasing student work.",
-    },
-    {
-      id: 2,
-      title: language === "tr" ? "Genç Tasarımcılar Buluşması" : "Young Designers Meetup",
-      location: language === "tr" ? "Modern Sanat Müzesi, Ankara" : "Modern Art Museum, Ankara",
-      year: "2023",
-      description: language === "tr" 
-        ? "Genç tasarımcıların eserlerinin sergilendiği bu etkinlikte, marka kimliği tasarımlarım sergilendi." 
-        : "My brand identity designs were exhibited in this event showcasing works by young designers.",
-    },
-    {
-      id: 3,
-      title: language === "tr" ? "Dijital Tasarım Fuarı" : "Digital Design Fair",
-      location: language === "tr" ? "Tasarım Merkezi, İzmir" : "Design Center, Izmir",
-      year: "2023",
-    },
-    {
-      id: 4,
-      title: language === "tr" ? "Tipografi Sergisi" : "Typography Exhibition",
-      location: language === "tr" ? "Sanat Galerisi, Bursa" : "Art Gallery, Bursa",
-      year: "2022",
-    },
-  ];
-
-  const handleItemClick = (item: AwardItem | ExhibitionItem, type: "award" | "exhibition") => {
-    setSelectedItem({ item, type });
-    setIsModalOpen(true);
+  const handleItemClick = (itemId: string, type: "award" | "exhibition") => {
+    if (type === "award") {
+      const kvAward = awardsData.awards.find(a => a.id === itemId);
+      if (kvAward) {
+        setSelectedItem({ item: kvAward, type });
+        setIsModalOpen(true);
+      }
+    } else {
+      const kvExhibition = awardsData.exhibitions.find(e => e.id === itemId);
+      if (kvExhibition) {
+        setSelectedItem({ item: kvExhibition, type });
+        setIsModalOpen(true);
+      }
+    }
   };
 
   const handleCloseModal = () => {
@@ -121,8 +37,60 @@ export function AwardsSection() {
     setTimeout(() => setSelectedItem(null), 300);
   };
 
-  const displayedAwards = showAllAwards ? awards : awards.slice(0, 3);
-  const displayedExhibitions = showAllExhibitions ? exhibitions : exhibitions.slice(0, 3);
+  if (loading) {
+    return (
+      <section
+        id="awards"
+        className="bg-background px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24"
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center py-12">
+            <p className="text-muted-foreground dark:text-foreground/70">
+              {language === "tr" ? "Yükleniyor..." : "Loading..."}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Convert KV data format to display format (for rendering)
+  const displayAwards = awardsData.awards.map((award) => ({
+    id: award.id,
+    title: award.title[language],
+    organization: award.organization[language],
+    year: award.year,
+    category: award.category,
+    description: award.description ? award.description[language] : undefined,
+  }));
+
+  const displayExhibitions = awardsData.exhibitions.map((exhibition) => ({
+    id: exhibition.id,
+    title: exhibition.title[language],
+    location: exhibition.location[language],
+    year: exhibition.year,
+    description: exhibition.description ? exhibition.description[language] : undefined,
+  }));
+
+  if (error || (displayAwards.length === 0 && displayExhibitions.length === 0)) {
+    return (
+      <section
+        id="awards"
+        className="bg-background px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 lg:py-24"
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center py-12">
+            <p className="text-sm sm:text-base text-muted-foreground dark:text-foreground/70">
+              {error || (language === "tr" ? "Henüz ödül veya sergi eklenmemiş." : "No awards or exhibitions added yet.")}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const displayedAwards = showAllAwards ? displayAwards : displayAwards.slice(0, 3);
+  const displayedExhibitions = showAllExhibitions ? displayExhibitions : displayExhibitions.slice(0, 3);
 
   const getAwardIcon = (category: string) => {
     switch (category) {
@@ -176,7 +144,7 @@ export function AwardsSection() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 + index * 0.1 }}
                 whileHover={{ scale: 1.02 }}
-                onClick={() => handleItemClick(award, "award")}
+                onClick={() => handleItemClick(award.id, "award")}
                 data-clickable
               >
                 <div className="mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -201,7 +169,7 @@ export function AwardsSection() {
           </div>
 
           {/* Show More/Less Button for Awards */}
-          {awards.length > 3 && (
+          {displayAwards.length > 3 && (
             <motion.div
               className="mt-6 sm:mt-8 flex justify-center"
               initial={{ opacity: 0 }}
@@ -248,7 +216,7 @@ export function AwardsSection() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.5 + index * 0.1 }}
                 whileHover={{ paddingLeft: 24, paddingRight: 24 }}
-                onClick={() => handleItemClick(exhibition, "exhibition")}
+                onClick={() => handleItemClick(exhibition.id, "exhibition")}
                 data-clickable
               >
                 <div className="flex-1">
@@ -272,7 +240,7 @@ export function AwardsSection() {
           </div>
 
           {/* Show More/Less Button for Exhibitions */}
-          {exhibitions.length > 3 && (
+          {displayExhibitions.length > 3 && (
             <motion.div
               className="mt-6 sm:mt-8 flex justify-center"
               initial={{ opacity: 0 }}
@@ -305,12 +273,12 @@ export function AwardsSection() {
         <AwardExhibitionModal
           item={{
             id: selectedItem.item.id,
-            title: selectedItem.item.title,
-            organization: selectedItem.type === "award" ? (selectedItem.item as AwardItem).organization : undefined,
-            location: selectedItem.type === "exhibition" ? (selectedItem.item as ExhibitionItem).location : undefined,
+            title: selectedItem.item.title[language],
+            organization: selectedItem.type === "award" ? (selectedItem.item as AwardItem).organization[language] : undefined,
+            location: selectedItem.type === "exhibition" ? (selectedItem.item as ExhibitionItem).location[language] : undefined,
             year: selectedItem.item.year,
             category: selectedItem.type === "award" ? (selectedItem.item as AwardItem).category : undefined,
-            description: selectedItem.item.description,
+            description: selectedItem.item.description ? selectedItem.item.description[language] : undefined,
             type: selectedItem.type,
           }}
           isOpen={isModalOpen}

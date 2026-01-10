@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     siteName: "İpek Kökdemir",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/placeholder.svg",
         width: 1200,
         height: 630,
         alt: "İpek Kökdemir - Grafik Tasarım Portföyü",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     title: "İpek Kökdemir – Grafik Tasarım Portföyü",
     description:
       "Grafik tasarım öğrencisi İpek Kökdemir'in yaratıcı çalışmalarını keşfedin.",
-    images: ["/twitter-image.jpg"],
+    images: ["/placeholder.svg"], // TODO: Replace with actual Twitter image
     creator: "@ipekkokdemir",
   },
   robots: {

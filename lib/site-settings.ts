@@ -8,6 +8,7 @@ export interface SiteSettings {
   socialLinks: SocialLink[];
   metadata: SiteMetadata;
   heroImages: HeroImages;
+  cvUrl?: string; // CV PDF file URL or path
   sectionVisibility?: {
     hero: boolean;
     about: boolean;

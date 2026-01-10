@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   Save,
-  Eye,
-  EyeOff,
   Image as ImageIcon,
   Settings,
   FileText,
@@ -20,6 +18,7 @@ import {
   X,
   Trash2,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import { SiteSettings, SocialLink } from "@/lib/site-settings";
 import { Button } from "@/components/ui/button";
@@ -44,8 +43,6 @@ export function SiteSettingsManager() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewLang, setPreviewLang] = useState<"tr" | "en">("tr");
 
   useEffect(() => {
     fetchSettings();
@@ -57,16 +54,102 @@ export function SiteSettingsManager() {
       const result = await response.json();
       if (result.success) {
         setSettings(result.data);
+      } else {
+        const errorMessage = result.error || "Site ayarları yüklenemedi";
+        const detailsMessage = result.details 
+          ? `\n\nDetaylar: ${Array.isArray(result.details) ? result.details.join('\n') : result.details}`
+          : '';
+        toast.error(`${errorMessage}${detailsMessage}`, {
+          duration: 10000,
+        });
+        console.error("Settings fetch error:", result);
       }
     } catch (error) {
-      toast.error("Site ayarları yüklenemedi");
+      const errorMessage = error instanceof Error 
+        ? `Bağlantı hatası: ${error.message}` 
+        : "Site ayarları yüklenemedi";
+      toast.error(errorMessage, {
+        duration: 10000,
+      });
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!settings) return;
+    if (!settings) {
+      toast.error("Ayarlar yüklenmedi. Lütfen sayfayı yenileyin.");
+      return;
+    }
+
+    // Client-side validasyon
+    const validationErrors: string[] = [];
+    
+    // Temel alanlar
+    if (!settings.translations?.tr || !settings.translations?.en) {
+      validationErrors.push("❌ Çeviri alanları eksik");
+    }
+    if (!settings.metadata?.title || settings.metadata.title.trim() === "") {
+      validationErrors.push("❌ Site başlığı (metadata.title) boş olamaz");
+    }
+    if (!settings.metadata?.description || settings.metadata.description.trim() === "") {
+      validationErrors.push("❌ Site açıklaması (metadata.description) boş olamaz");
+    }
+    if (!Array.isArray(settings.heroImages) || settings.heroImages.length === 0) {
+      validationErrors.push("❌ En az bir hero görseli eklenmelidir");
+    }
+    
+    // Hero görselleri kontrolü
+    settings.heroImages?.forEach((img, index) => {
+      if (!img.url || img.url.trim() === "") {
+        validationErrors.push(`❌ Hero görsel ${index + 1}: URL boş olamaz`);
+      }
+      if (!img.alt || img.alt.trim() === "") {
+        validationErrors.push(`❌ Hero görsel ${index + 1}: Alt text boş olamaz`);
+      }
+    });
+    
+    // Social links kontrolü
+    settings.socialLinks?.forEach((link, index) => {
+      if (!link.href || link.href.trim() === "") {
+        validationErrors.push(`❌ Sosyal medya linki ${index + 1} (${link.name || 'Bilinmeyen'}): URL boş olamaz`);
+      }
+      if (link.href && link.href.trim() !== "") {
+        try {
+          new URL(link.href);
+        } catch {
+          validationErrors.push(`❌ Sosyal medya linki ${index + 1} (${link.name || 'Bilinmeyen'}): Geçersiz URL formatı - "${link.href}"`);
+        }
+      }
+    });
+    
+    // Navigation kontrolü
+    if (settings.translations?.tr?.navigation) {
+      const nav = settings.translations.tr.navigation;
+      if (!nav.home || nav.home.trim() === "") validationErrors.push("❌ Türkçe navigasyon: 'Ana Sayfa' boş olamaz");
+      if (!nav.about || nav.about.trim() === "") validationErrors.push("❌ Türkçe navigasyon: 'Hakkımda' boş olamaz");
+      if (!nav.portfolio || nav.portfolio.trim() === "") validationErrors.push("❌ Türkçe navigasyon: 'Portföy' boş olamaz");
+    }
+    if (settings.translations?.en?.navigation) {
+      const nav = settings.translations.en.navigation;
+      if (!nav.home || nav.home.trim() === "") validationErrors.push("❌ İngilizce navigasyon: 'Home' boş olamaz");
+      if (!nav.about || nav.about.trim() === "") validationErrors.push("❌ İngilizce navigasyon: 'About' boş olamaz");
+      if (!nav.portfolio || nav.portfolio.trim() === "") validationErrors.push("❌ İngilizce navigasyon: 'Portfolio' boş olamaz");
+    }
+    
+    // Client-side hataları göster
+    if (validationErrors.length > 0) {
+      const errorMessage = `Validasyon hatası (${validationErrors.length} hata):\n\n${validationErrors.slice(0, 5).join('\n')}${validationErrors.length > 5 ? `\n\n...ve ${validationErrors.length - 5} hata daha` : ''}`;
+      toast.error(errorMessage, {
+        duration: 10000,
+      });
+      
+      // Tüm hataları konsola yazdır
+      console.error("Validasyon Hataları:", validationErrors);
+      setSaving(false);
+      return;
+    }
 
     setSaving(true);
     try {
@@ -79,13 +162,35 @@ export function SiteSettingsManager() {
       const result = await response.json();
 
       if (result.success) {
-        toast.success("Ayarlar kaydedildi");
+        toast.success("Ayarlar başarıyla kaydedildi");
         fetchSettings();
       } else {
-        toast.error(result.error || "Kaydetme başarısız");
+        // Detaylı hata mesajı göster
+        let errorMessage = result.error || "Kaydetme başarısız";
+        
+        if (result.details && Array.isArray(result.details) && result.details.length > 0) {
+          const detailsText = result.details.slice(0, 10).join('\n');
+          const moreText = result.details.length > 10 ? `\n\n...ve ${result.details.length - 10} hata daha` : '';
+          errorMessage = `${errorMessage}\n\nHata Detayları (${result.errorCount || result.details.length} hata):\n${detailsText}${moreText}`;
+          
+          // Tüm hataları konsola yazdır
+          console.error("Sunucu Validasyon Hataları:", result.details);
+        }
+        
+        toast.error(errorMessage, {
+          duration: 15000,
+        });
       }
     } catch (error) {
-      toast.error("Bir hata oluştu");
+      const errorMessage = error instanceof Error 
+        ? `Bağlantı hatası: ${error.message}` 
+        : "Bilinmeyen bir hata oluştu";
+      
+      toast.error(errorMessage, {
+        duration: 10000,
+      });
+      
+      console.error("Save error:", error);
     } finally {
       setSaving(false);
     }
@@ -192,11 +297,9 @@ export function SiteSettingsManager() {
     "github",
   ];
 
-  const activeLang = previewLang;
-
   return (
     <div className="space-y-6">
-      {/* Modern Header with Save and Preview */}
+      {/* Modern Header with Save */}
       <div className="relative overflow-hidden bg-linear-to-br from-primary/10 via-primary/5 to-background dark:from-primary/20 dark:via-primary/10 dark:to-background rounded-xl border border-primary/20 dark:border-primary/30 shadow-lg p-6">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -213,30 +316,6 @@ export function SiteSettingsManager() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
-              variant="outline"
-              onClick={() => setShowPreview(!showPreview)}
-              className="gap-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all"
-            >
-              {showPreview ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-              {showPreview ? "Önizlemeyi Gizle" : "Önizle"}
-            </Button>
-            {showPreview && (
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setPreviewLang(previewLang === "tr" ? "en" : "tr")
-                }
-                size="sm"
-                className="border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-              >
-                {previewLang === "tr" ? "EN" : "TR"}
-              </Button>
-            )}
-            <Button
               onClick={handleSave}
               disabled={saving}
               className="gap-2 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all disabled:opacity-50"
@@ -247,64 +326,6 @@ export function SiteSettingsManager() {
           </div>
         </div>
       </div>
-
-      {/* Preview Panel */}
-      {showPreview && settings && (
-        <Card className="border-2 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Önizleme ({activeLang.toUpperCase()})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Hero Preview */}
-            <div className="space-y-2">
-              <h3 className="font-semibold text-sm text-muted-foreground">
-                Hero Section
-              </h3>
-              <div className="grid grid-cols-3 gap-2">
-                {settings.heroImages && (
-                  <>
-                    <div className="relative aspect-3/4 rounded-lg overflow-hidden border">
-                      <Image
-                        src={settings.heroImages.image1 || "/placeholder.svg"}
-                        alt="Preview 1"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="relative aspect-3/4 rounded-lg overflow-hidden border">
-                      <Image
-                        src={settings.heroImages.image2 || "/placeholder.svg"}
-                        alt="Preview 2"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="relative aspect-3/4 rounded-lg overflow-hidden border opacity-70">
-                      <Image
-                        src={settings.heroImages.image3 || "/placeholder.svg"}
-                        alt="Preview 3"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="pt-2 space-y-1">
-                <p className="text-2xl font-serif">
-                  {settings.translations[activeLang].hero.name}
-                </p>
-                <p className="text-lg italic text-muted-foreground">
-                  {settings.translations[activeLang].hero.subtitle}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <Tabs defaultValue="hero" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 p-1 bg-muted/50 rounded-lg border border-border/50">
@@ -1457,6 +1478,23 @@ export function SiteSettingsManager() {
                     placeholder="Download CV"
                     className="text-xs"
                   />
+                </div>
+                <div>
+                  <Label className="text-xs">CV PDF URL</Label>
+                  <Input
+                    value={settings.cvUrl || ""}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        cvUrl: e.target.value,
+                      })
+                    }
+                    placeholder="/cv.pdf veya https://..."
+                    className="text-xs"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    CV indir butonuna tıklandığında indirilecek PDF dosyasının URL'si
+                  </p>
                 </div>
               </CardContent>
             </Card>

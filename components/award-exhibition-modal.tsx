@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 
 export type AwardExhibitionItem = {
-  id: number;
+  id: string;
   title: string;
   organization?: string;
   location?: string;
