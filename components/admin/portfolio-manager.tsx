@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Save, X } from "lucide-react";
-import { PortfolioItem } from "@/lib/portfolio-data";
+import { PortfolioItem, MediaItem } from "@/lib/portfolio-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +16,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { MediaManager } from "./media-manager";
+import { ImageUpload } from "./image-upload";
 
 export function PortfolioManager() {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
@@ -162,7 +164,29 @@ export function PortfolioManager() {
                   <p className="text-muted-foreground mb-2">
                     {item.category.tr} • {item.year}
                   </p>
-                  <p className="text-sm mb-4 line-clamp-2">{item.description.tr}</p>
+                  <p className="text-sm mb-2 line-clamp-2">{item.description.tr}</p>
+                  {item.media && item.media.length > 0 && (
+                    <p className="text-xs text-muted-foreground mb-4">
+                      {item.media.length} medya öğesi ({item.media.filter((m) => m.type === "image").length} görsel, {item.media.filter((m) => m.type === "video").length} video)
+                    </p>
+                  )}
+                  {item.tags?.tr && item.tags.tr.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {item.tags.tr.slice(0, 3).map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="text-xs px-2 py-1 bg-secondary rounded-full text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {item.tags.tr.length > 3 && (
+                        <span className="text-xs px-2 py-1 text-muted-foreground">
+                          +{item.tags.tr.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
                       <Edit className="mr-2 h-4 w-4" />
@@ -193,7 +217,7 @@ export function PortfolioManager() {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingItem ? "Portfolio Düzenle" : "Yeni Portfolio Ekle"}
@@ -299,11 +323,12 @@ export function PortfolioManager() {
             </div>
 
             <div>
-              <Label>Ana Görsel URL</Label>
-              <Input
+              <ImageUpload
                 value={formData.image || ""}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                onChange={(value) => setFormData({ ...formData, image: value })}
+                label="Ana Görsel"
                 placeholder="/image.jpg veya https://..."
+                showPreview={true}
               />
             </div>
 
@@ -334,6 +359,15 @@ export function PortfolioManager() {
                   placeholder="Design, Typography, Color"
                 />
               </div>
+            </div>
+
+            {/* Media Manager */}
+            <div className="pt-4 border-t">
+              <MediaManager
+                media={formData.media || []}
+                onChange={(media) => setFormData({ ...formData, media })}
+                title="Portfolio Medya Galerisi"
+              />
             </div>
           </div>
 

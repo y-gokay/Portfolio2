@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LogOut, FolderKanban, Settings } from "lucide-react";
+import { LogOut, FolderKanban, Settings, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PortfolioManager } from "@/components/admin/portfolio-manager";
 import { SiteSettingsManager } from "@/components/admin/site-settings-manager";
+import { MediaGallery } from "@/components/admin/media-gallery";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -32,10 +33,14 @@ export default function AdminPage() {
         </div>
 
         <Tabs defaultValue="portfolio" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="portfolio">
               <FolderKanban className="mr-2 h-4 w-4" />
               Portfolio
+            </TabsTrigger>
+            <TabsTrigger value="gallery">
+              <ImageIcon className="mr-2 h-4 w-4" />
+              Medya Galeri
             </TabsTrigger>
             <TabsTrigger value="settings">
               <Settings className="mr-2 h-4 w-4" />
@@ -45,6 +50,10 @@ export default function AdminPage() {
 
           <TabsContent value="portfolio" className="mt-6">
             <PortfolioManager />
+          </TabsContent>
+
+          <TabsContent value="gallery" className="mt-6">
+            <MediaGallery />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6">

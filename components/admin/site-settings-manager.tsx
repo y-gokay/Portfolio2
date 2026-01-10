@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImageUpload } from "./image-upload";
 
 export function SiteSettingsManager() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -712,11 +713,12 @@ export function SiteSettingsManager() {
                 />
               </div>
               <div>
-                <Label>OG Image URL</Label>
-                <Input
+                <ImageUpload
                   value={settings.metadata.ogImage}
-                  onChange={(e) => updateMetadata("ogImage", e.target.value)}
+                  onChange={(value) => updateMetadata("ogImage", value)}
+                  label="Open Graph Image (OG Image)"
                   placeholder="/og-image.jpg"
+                  showPreview={true}
                 />
               </div>
               <div>
@@ -728,11 +730,12 @@ export function SiteSettingsManager() {
                 />
               </div>
               <div>
-                <Label>Twitter Image URL</Label>
-                <Input
+                <ImageUpload
                   value={settings.metadata.twitterImage}
-                  onChange={(e) => updateMetadata("twitterImage", e.target.value)}
+                  onChange={(value) => updateMetadata("twitterImage", value)}
+                  label="Twitter Image"
                   placeholder="/twitter-image.jpg"
+                  showPreview={true}
                 />
               </div>
             </CardContent>
