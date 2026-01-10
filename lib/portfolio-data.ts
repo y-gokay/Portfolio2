@@ -18,10 +18,10 @@ export type PortfolioItem = {
     tr: string;
     en: string;
   };
-  image: string; // Main thumbnail/image
-  media?: MediaItem[]; // Can include both images and videos
-  images?: string[]; // Legacy support - will be converted to media
-  video?: string; // Legacy support - single video URL
+  image: string;
+  media?: MediaItem[];
+  images?: string[];
+  video?: string;
   year: string;
   tags: {
     tr: string[];
