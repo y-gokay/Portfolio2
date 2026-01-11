@@ -90,7 +90,7 @@ export function HeroSection() {
         <div className="relative flex items-center justify-center w-full min-h-[250px] h-[250px] xs:min-h-[280px] xs:h-[280px] sm:min-h-[350px] sm:h-[350px] md:min-h-[450px] md:h-[450px] lg:min-h-[550px] lg:h-[550px] xl:min-h-[600px] xl:h-[600px]">
           {/* First Image - Draggable to Right */}
           <motion.div
-            className={`absolute w-[110px] xs:w-[130px] sm:w-[160px] md:w-[220px] lg:w-[260px] xl:w-[300px] 2xl:w-[320px] aspect-[3/4] rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-lg sm:shadow-xl md:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-10 ${
+            className={`absolute w-[110px] xs:w-[130px] sm:w-[160px] md:w-[220px] lg:w-[260px] xl:w-[300px] 2xl:w-[320px] aspect-3/4 rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-lg sm:shadow-xl md:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-10 ${
               prefersReducedMotion ? "cursor-default" : "cursor-grab active:cursor-grabbing"
             }`}
             initial={{
@@ -145,7 +145,7 @@ export function HeroSection() {
 
           {/* Second Image - Center, Draggable to Left */}
           <motion.div
-            className={`relative w-[110px] xs:w-[130px] sm:w-[160px] md:w-[220px] lg:w-[260px] xl:w-[300px] 2xl:w-[320px] aspect-[3/4] rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-lg sm:shadow-xl md:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-20 ${
+            className={`relative w-[110px] xs:w-[130px] sm:w-[160px] md:w-[220px] lg:w-[260px] xl:w-[300px] 2xl:w-[320px] aspect-3/4 rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-lg sm:shadow-xl md:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-20 ${
               prefersReducedMotion ? "cursor-default" : "cursor-grab active:cursor-grabbing"
             }`}
             initial={{ clipPath: "inset(100% 0 0 0)", x: 0, y: 0, rotate: 0 }}
@@ -195,7 +195,7 @@ export function HeroSection() {
 
           {/* Third Image - Static Background */}
           <motion.div
-            className="absolute w-[110px] xs:w-[130px] sm:w-[160px] md:w-[220px] lg:w-[260px] xl:w-[300px] 2xl:w-[320px] aspect-[3/4] rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-lg sm:shadow-xl md:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-0 opacity-60 sm:opacity-70 md:opacity-80"
+            className="absolute w-[110px] xs:w-[130px] sm:w-[160px] md:w-[220px] lg:w-[260px] xl:w-[300px] 2xl:w-[320px] aspect-3/4 rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-lg sm:shadow-xl md:shadow-2xl dark:shadow-primary/20 dark:border dark:border-primary/20 z-0 opacity-60 sm:opacity-70 md:opacity-80"
             initial={{ clipPath: "inset(100% 0 0 0)", x: imageOffset, y: 0, rotate: prefersReducedMotion ? 0 : 8 }}
             animate={{
               clipPath: "inset(0 0 0 0)",
@@ -225,10 +225,10 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.8 }}
         >
-          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-serif text-center text-foreground leading-tight break-words">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-serif text-center text-foreground leading-tight wrap-break-word">
             {t.hero.name}
           </h1>
-          <em className="font-serif italic text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-foreground/80 mt-1 sm:mt-1.5 md:mt-2 text-center break-words px-2 sm:px-3">
+          <em className="font-serif italic text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-foreground/80 mt-1 sm:mt-1.5 md:mt-2 text-center wrap-break-word px-2 sm:px-3">
             {t.hero.subtitle}
           </em>
         </motion.div>

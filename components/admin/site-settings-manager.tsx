@@ -38,6 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageUpload } from "./image-upload";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
+import { formatUserFriendlyError, groupErrorsByCategory } from "@/lib/user-friendly-errors";
 
 export function SiteSettingsManager() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -107,21 +108,20 @@ export function SiteSettingsManager() {
       validationErrors.push("❌ Site açıklaması (metadata.description) boş olamaz");
     }
     
-    // heroImages artık bir obje {image1: {url, alt}, image2: {url, alt}, image3: {url, alt}}
-    if (!settings.heroImages || typeof settings.heroImages !== 'object') {
-      validationErrors.push("❌ Hero görselleri eksik veya geçersiz format");
-    } else {
-      const heroImages = settings.heroImages as { image1?: { url?: string; alt?: string }; image2?: { url?: string; alt?: string }; image3?: { url?: string; alt?: string } };
+    // heroImages bir obje {image1: string, image2: string, image3: string} - her değer bir URL string
+    // Hero görselleri opsiyonel, bu yüzden sadece varsa ve boş değilse kontrol et
+    if (settings.heroImages && typeof settings.heroImages === 'object') {
+      const heroImages = settings.heroImages as { image1?: string; image2?: string; image3?: string };
       const imageKeys = ['image1', 'image2', 'image3'] as const;
       
       imageKeys.forEach((key) => {
-        const img = heroImages[key];
-        if (img) {
-          if (!img.url || typeof img.url !== 'string' || img.url.trim() === "") {
+        const imgUrl = heroImages[key];
+        // Sadece değer varsa ve boş string değilse kontrol et (opsiyonel alanlar)
+        if (imgUrl !== undefined && imgUrl !== null && imgUrl !== "") {
+          if (typeof imgUrl !== 'string') {
+            validationErrors.push(`❌ Hero görsel ${key}: Geçersiz format (string olmalı)`);
+          } else if (imgUrl.trim() === "") {
             validationErrors.push(`❌ Hero görsel ${key}: URL boş olamaz`);
-          }
-          if (!img.alt || typeof img.alt !== 'string' || img.alt.trim() === "") {
-            validationErrors.push(`❌ Hero görsel ${key}: Alt text boş olamaz`);
           }
         }
       });
@@ -157,12 +157,37 @@ export function SiteSettingsManager() {
     
     // Client-side hataları göster
     if (validationErrors.length > 0) {
-      const errorMessage = `Validasyon hatası (${validationErrors.length} hata):\n\n${validationErrors.slice(0, 5).join('\n')}${validationErrors.length > 5 ? `\n\n...ve ${validationErrors.length - 5} hata daha` : ''}`;
-      toast.error(errorMessage, {
-        duration: 10000,
+      const groupedErrors = groupErrorsByCategory(validationErrors);
+      const friendlyErrors = validationErrors.map(formatUserFriendlyError);
+      
+      // Kullanıcı dostu hata mesajı oluştur
+      let errorMessage = `Lütfen aşağıdaki ${validationErrors.length} hatayı düzeltin:\n\n`;
+      
+      if (groupedErrors.length > 0) {
+        groupedErrors.forEach(({ category, errors }) => {
+          errorMessage += `📋 ${category}:\n`;
+          errors.slice(0, 3).forEach(err => {
+            errorMessage += `  • ${err}\n`;
+          });
+          if (errors.length > 3) {
+            errorMessage += `  • ...ve ${errors.length - 3} hata daha\n`;
+          }
+          errorMessage += '\n';
+        });
+      } else {
+        friendlyErrors.slice(0, 5).forEach(err => {
+          errorMessage += `• ${err}\n`;
+        });
+        if (friendlyErrors.length > 5) {
+          errorMessage += `\n...ve ${friendlyErrors.length - 5} hata daha`;
+        }
+      }
+      
+      toast.error(errorMessage.trim(), {
+        duration: 15000,
       });
       
-      // Tüm hataları konsola yazdır
+      // Tüm hataları konsola yazdır (developer için)
       console.error("Validasyon Hataları:", validationErrors);
       setSaving(false);
       return;
@@ -182,20 +207,41 @@ export function SiteSettingsManager() {
         toast.success("Ayarlar başarıyla kaydedildi");
         fetchSettings();
       } else {
-        // Detaylı hata mesajı göster
-        let errorMessage = result.error || "Kaydetme başarısız";
+        // Kullanıcı dostu hata mesajı göster
+        let errorMessage = result.error || "Kaydetme işlemi başarısız oldu";
         
         if (result.details && Array.isArray(result.details) && result.details.length > 0) {
-          const detailsText = result.details.slice(0, 10).join('\n');
-          const moreText = result.details.length > 10 ? `\n\n...ve ${result.details.length - 10} hata daha` : '';
-          errorMessage = `${errorMessage}\n\nHata Detayları (${result.errorCount || result.details.length} hata):\n${detailsText}${moreText}`;
+          const groupedErrors = groupErrorsByCategory(result.details);
+          const friendlyErrors = result.details.map(formatUserFriendlyError);
           
-          // Tüm hataları konsola yazdır
+          errorMessage = `Lütfen aşağıdaki ${result.errorCount || result.details.length} hatayı düzeltin:\n\n`;
+          
+          if (groupedErrors.length > 0) {
+            groupedErrors.forEach(({ category, errors }) => {
+              errorMessage += `📋 ${category}:\n`;
+              errors.slice(0, 3).forEach(err => {
+                errorMessage += `  • ${err}\n`;
+              });
+              if (errors.length > 3) {
+                errorMessage += `  • ...ve ${errors.length - 3} hata daha\n`;
+              }
+              errorMessage += '\n';
+            });
+          } else {
+            friendlyErrors.slice(0, 5).forEach(err => {
+              errorMessage += `• ${err}\n`;
+            });
+            if (friendlyErrors.length > 5) {
+              errorMessage += `\n...ve ${friendlyErrors.length - 5} hata daha`;
+            }
+          }
+          
+          // Tüm hataları konsola yazdır (developer için)
           console.error("Sunucu Validasyon Hataları:", result.details);
         }
         
-        toast.error(errorMessage, {
-          duration: 15000,
+        toast.error(errorMessage.trim(), {
+          duration: 20000,
         });
       }
     } catch (error) {

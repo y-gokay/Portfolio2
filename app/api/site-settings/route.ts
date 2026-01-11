@@ -180,22 +180,27 @@ export async function PUT(request: Request) {
       }
     }
     
-    if (!settings.heroImages) {
-      errors.push("❌ 'heroImages' alanı eksik");
-    } else {
+    // heroImages opsiyonel - varsa kontrol et
+    if (settings.heroImages !== undefined && settings.heroImages !== null) {
       // heroImages bir obje: {image1: string, image2: string, image3: string}
       if (typeof settings.heroImages !== 'object' || Array.isArray(settings.heroImages)) {
         errors.push("❌ 'heroImages' bir obje olmalı: {image1: string, image2: string, image3: string}");
       } else {
-        if (!settings.heroImages.image1 || settings.heroImages.image1.trim() === "") {
-          errors.push("❌ 'heroImages.image1' boş olamaz");
-        }
-        if (!settings.heroImages.image2 || settings.heroImages.image2.trim() === "") {
-          errors.push("❌ 'heroImages.image2' boş olamaz");
-        }
-        if (!settings.heroImages.image3 || settings.heroImages.image3.trim() === "") {
-          errors.push("❌ 'heroImages.image3' boş olamaz");
-        }
+        // Her görsel opsiyonel - sadece varsa ve boş değilse kontrol et
+        const heroImages = settings.heroImages as { image1?: string; image2?: string; image3?: string };
+        const imageKeys: Array<'image1' | 'image2' | 'image3'> = ['image1', 'image2', 'image3'];
+        
+        imageKeys.forEach((key) => {
+          const imgUrl = heroImages[key];
+          // Sadece değer varsa ve boş string değilse kontrol et
+          if (imgUrl !== undefined && imgUrl !== null && imgUrl !== "") {
+            if (typeof imgUrl !== 'string') {
+              errors.push(`❌ 'heroImages.${key}' geçersiz format (string olmalı)`);
+            } else if (imgUrl.trim() === "") {
+              errors.push(`❌ 'heroImages.${key}' boş olamaz`);
+            }
+          }
+        });
       }
     }
     
