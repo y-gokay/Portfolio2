@@ -10,23 +10,45 @@ import { ScrollProgress } from "@/components/scroll-progress";
 import { BackToTop } from "@/components/back-to-top";
 import { FooterSection } from "@/components/sections/footer-section";
 import { useResume } from "@/hooks/use-resume";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export default function ResumePage() {
   const { t, language } = useLanguage();
   const { resumeData, loading, error } = useResume();
 
+  // Get CV URL from site settings (since CV is stored in site-settings, not resume data)
+  const { settings: siteSettings, getSectionVisibility } = useSiteSettings();
+  const cvUrl = siteSettings?.cvUrl || "";
+  const hasCv = cvUrl && cvUrl.trim() !== "" && cvUrl !== "/cv.pdf";
+  
+  // Check if resume section/page is visible
+  const isResumeVisible = getSectionVisibility("resume");
+  
+  // If resume is hidden, show a message instead
+  if (!isResumeVisible) {
+    return (
+      <ErrorBoundary>
+        <LenisProvider>
+          <StickyHeader />
+          <ScrollProgress />
+          <main id="main-content" className="bg-background pt-20 sm:pt-24">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20">
+              <div className="text-center py-12">
+                <p className="text-sm sm:text-base text-muted-foreground dark:text-foreground/70">
+                  {language === "tr" ? "Bu sayfa şu anda görünür değil." : "This page is currently not visible."}
+                </p>
+              </div>
+            </div>
+          </main>
+          <BackToTop />
+        </LenisProvider>
+      </ErrorBoundary>
+    );
+  }
+
   const handleDownloadCV = () => {
-    if (resumeData?.cvUrl) {
-      const cvUrl = resumeData.cvUrl[language] || resumeData.cvUrl.tr || resumeData.cvUrl.en;
-      if (cvUrl) {
-        window.open(cvUrl, "_blank");
-      } else {
-        // Fallback: try to download from /cv.pdf
-        window.open("/cv.pdf", "_blank");
-      }
-    } else {
-      // Fallback: try to download from /cv.pdf
-      window.open("/cv.pdf", "_blank");
+    if (hasCv && cvUrl) {
+      window.open(cvUrl, "_blank");
     }
   };
 
@@ -41,6 +63,28 @@ export default function ResumePage() {
               <div className="text-center py-12">
                 <p className="text-muted-foreground dark:text-foreground/70">
                   {language === "tr" ? "Yükleniyor..." : "Loading..."}
+                </p>
+              </div>
+            </div>
+          </main>
+          <BackToTop />
+        </LenisProvider>
+      </ErrorBoundary>
+    );
+  }
+
+  // If resume page is hidden, show a message instead
+  if (!isResumeVisible) {
+    return (
+      <ErrorBoundary>
+        <LenisProvider>
+          <StickyHeader />
+          <ScrollProgress />
+          <main id="main-content" className="bg-background pt-20 sm:pt-24">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20">
+              <div className="text-center py-12">
+                <p className="text-sm sm:text-base text-muted-foreground dark:text-foreground/70">
+                  {language === "tr" ? "Bu sayfa şu anda görünür değil." : "This page is currently not visible."}
                 </p>
               </div>
             </div>

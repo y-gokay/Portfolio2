@@ -1,7 +1,6 @@
 export type MediaItem = {
   type: "image" | "video";
-  url: string;
-  thumbnail?: string; // For video thumbnails
+  url: string; // YouTube URL or direct video URL
 };
 
 export type PortfolioItem = {

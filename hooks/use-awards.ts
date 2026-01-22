@@ -14,7 +14,7 @@ export function useAwards() {
   useEffect(() => {
     async function fetchAwards() {
       try {
-        const response = await fetch("/api/awards");
+        const response = await fetch("/api/v1/awards");
         const result = await response.json();
 
         if (result.success && result.data) {

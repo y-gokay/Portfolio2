@@ -11,7 +11,7 @@ export function useSiteSettings() {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const response = await fetch("/api/site-settings");
+        const response = await fetch("/api/v1/site-settings");
         const result = await response.json();
         if (result.success && result.data) {
           setSettings(result.data);

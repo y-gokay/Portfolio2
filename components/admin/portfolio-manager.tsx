@@ -41,28 +41,73 @@ export function PortfolioManager() {
 
   const fetchPortfolio = async () => {
     try {
-      const response = await fetch("/api/portfolio");
-      const result = await response.json();
-      if (result.success) {
-        setPortfolioItems(result.data);
+      const response = await fetch("/api/v1/portfolio");
+
+      // Check if response is ok (status 200-299)
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}: Portfolio verileri yüklenemedi`;
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+          if (errorData.details && Array.isArray(errorData.details)) {
+            errorMessage += `\n\n${errorData.details.slice(0, 3).join("\n")}`;
+          }
+        } catch {
+          // If JSON parse fails, use status text
+          errorMessage = `HTTP ${response.status} ${response.statusText}`;
+        }
+        toast.error(errorMessage, { duration: 10000 });
+        console.error(
+          "Portfolio fetch HTTP error:",
+          response.status,
+          response.statusText
+        );
+        setPortfolioItems([]);
+        return;
+      }
+
+      // Parse JSON response
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        toast.error("Sunucudan geçersiz yanıt alındı", { duration: 10000 });
+        console.error("Portfolio JSON parse error:", parseError);
+        setPortfolioItems([]);
+        return;
+      }
+
+      // Check if result is valid
+      if (result && result.success) {
+        setPortfolioItems(Array.isArray(result.data) ? result.data : []);
       } else {
-        const errorMessage = result.error || "Portfolio verileri yüklenemedi";
-        const detailsMessage = result.details 
-          ? `\n\nDetaylar: ${Array.isArray(result.details) ? result.details.join('\n') : result.details}`
-          : '';
+        const errorMessage = result?.error || "Portfolio verileri yüklenemedi";
+        const detailsMessage =
+          result?.details && Array.isArray(result.details)
+            ? `\n\n${result.details.slice(0, 5).join("\n")}`
+            : "";
         toast.error(`${errorMessage}${detailsMessage}`, {
           duration: 10000,
         });
-        console.error("Portfolio fetch error:", result);
+        console.error(
+          "Portfolio fetch API error:",
+          errorMessage,
+          result?.details || result
+        );
+        setPortfolioItems([]);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? `Bağlantı hatası: ${error.message}` 
-        : "Portfolio verileri yüklenemedi";
+      const errorMessage =
+        error instanceof Error
+          ? `Bağlantı hatası: ${error.message}`
+          : "Portfolio verileri yüklenemedi";
       toast.error(errorMessage, {
         duration: 10000,
       });
-      console.error("Fetch error:", error);
+      console.error("Portfolio fetch exception:", error);
+      setPortfolioItems([]);
     } finally {
       setLoading(false);
     }
@@ -94,7 +139,7 @@ export function PortfolioManager() {
     if (!confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) return;
 
     try {
-      const response = await fetch(`/api/portfolio?id=${id}`, {
+      const response = await fetch(`/api/v1/portfolio?id=${id}`, {
         method: "DELETE",
       });
       const result = await response.json();
@@ -104,8 +149,14 @@ export function PortfolioManager() {
         fetchPortfolio();
       } else {
         let errorMessage = result.error || "Silme işlemi başarısız";
-        if (result.details && Array.isArray(result.details) && result.details.length > 0) {
-          errorMessage = `${errorMessage}\n\nDetaylar: ${result.details.join('\n')}`;
+        if (
+          result.details &&
+          Array.isArray(result.details) &&
+          result.details.length > 0
+        ) {
+          errorMessage = `${errorMessage}\n\nDetaylar: ${result.details.join(
+            "\n"
+          )}`;
         }
         toast.error(errorMessage, {
           duration: 10000,
@@ -113,9 +164,10 @@ export function PortfolioManager() {
         console.error("Delete error:", result);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? `Bağlantı hatası: ${error.message}` 
-        : "Bilinmeyen bir hata oluştu";
+      const errorMessage =
+        error instanceof Error
+          ? `Bağlantı hatası: ${error.message}`
+          : "Bilinmeyen bir hata oluştu";
       toast.error(errorMessage, {
         duration: 10000,
       });
@@ -126,42 +178,46 @@ export function PortfolioManager() {
   const handleSave = async () => {
     // Detaylı client-side validasyon
     const errors: string[] = [];
-    
+
     if (!formData.id || formData.id.trim() === "") {
       errors.push("❌ ID boş olamaz");
     }
-    
+
     if (!formData.title?.tr || formData.title.tr.trim() === "") {
       errors.push("❌ Türkçe başlık (title.tr) boş olamaz");
     }
     if (!formData.title?.en || formData.title.en.trim() === "") {
       errors.push("❌ İngilizce başlık (title.en) boş olamaz");
     }
-    
+
     if (!formData.category?.tr || formData.category.tr.trim() === "") {
       errors.push("❌ Türkçe kategori (category.tr) boş olamaz");
     }
     if (!formData.category?.en || formData.category.en.trim() === "") {
       errors.push("❌ İngilizce kategori (category.en) boş olamaz");
     }
-    
+
     if (!formData.description?.tr || formData.description.tr.trim() === "") {
       errors.push("❌ Türkçe açıklama (description.tr) boş olamaz");
     }
     if (!formData.description?.en || formData.description.en.trim() === "") {
       errors.push("❌ İngilizce açıklama (description.en) boş olamaz");
     }
-    
+
     if (!formData.image || formData.image.trim() === "") {
       errors.push("❌ Ana görsel (image) URL'i boş olamaz");
     }
-    
+
     if (!formData.year || formData.year.trim() === "") {
       errors.push("❌ Yıl (year) boş olamaz");
     }
-    
+
     if (errors.length > 0) {
-      const errorMessage = `Validasyon hatası (${errors.length} hata):\n\n${errors.slice(0, 10).join('\n')}${errors.length > 10 ? `\n\n...ve ${errors.length - 10} hata daha` : ''}`;
+      const errorMessage = `Validasyon hatası (${
+        errors.length
+      } hata):\n\n${errors.slice(0, 10).join("\n")}${
+        errors.length > 10 ? `\n\n...ve ${errors.length - 10} hata daha` : ""
+      }`;
       toast.error(errorMessage, {
         duration: 10000,
       });
@@ -171,7 +227,7 @@ export function PortfolioManager() {
 
     try {
       const method = editingItem ? "PUT" : "POST";
-      const response = await fetch("/api/portfolio", {
+      const response = await fetch("/api/v1/portfolio", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -180,28 +236,42 @@ export function PortfolioManager() {
       const result = await response.json();
 
       if (result.success) {
-        toast.success(editingItem ? "Portfolio öğesi güncellendi" : "Portfolio öğesi eklendi");
+        toast.success(
+          editingItem
+            ? "Portfolio öğesi güncellendi"
+            : "Portfolio öğesi eklendi"
+        );
         setIsDialogOpen(false);
         fetchPortfolio();
       } else {
         // Detaylı hata mesajı göster
         let errorMessage = result.error || "İşlem başarısız";
-        
-        if (result.details && Array.isArray(result.details) && result.details.length > 0) {
-          const detailsText = result.details.slice(0, 10).join('\n');
-          const moreText = result.details.length > 10 ? `\n\n...ve ${result.details.length - 10} hata daha` : '';
-          errorMessage = `${errorMessage}\n\nHata Detayları (${result.errorCount || result.details.length} hata):\n${detailsText}${moreText}`;
+
+        if (
+          result.details &&
+          Array.isArray(result.details) &&
+          result.details.length > 0
+        ) {
+          const detailsText = result.details.slice(0, 10).join("\n");
+          const moreText =
+            result.details.length > 10
+              ? `\n\n...ve ${result.details.length - 10} hata daha`
+              : "";
+          errorMessage = `${errorMessage}\n\nHata Detayları (${
+            result.errorCount || result.details.length
+          } hata):\n${detailsText}${moreText}`;
           console.error("Sunucu Validasyon Hataları:", result.details);
         }
-        
+
         toast.error(errorMessage, {
           duration: 15000,
         });
       }
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? `Bağlantı hatası: ${error.message}` 
-        : "Bilinmeyen bir hata oluştu";
+      const errorMessage =
+        error instanceof Error
+          ? `Bağlantı hatası: ${error.message}`
+          : "Bilinmeyen bir hata oluştu";
       toast.error(errorMessage, {
         duration: 10000,
       });
@@ -210,7 +280,10 @@ export function PortfolioManager() {
   };
 
   const handleTagsChange = (lang: "tr" | "en", value: string) => {
-    const tags = value.split(",").map((t) => t.trim()).filter(Boolean);
+    const tags = value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
     setFormData({
       ...formData,
       tags: {
@@ -246,14 +319,22 @@ export function PortfolioManager() {
                   />
                 )}
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">{item.title.tr}</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    {item.title.tr}
+                  </h3>
                   <p className="text-muted-foreground mb-2">
                     {item.category.tr} • {item.year}
                   </p>
-                  <p className="text-sm mb-2 line-clamp-2">{item.description.tr}</p>
+                  <p className="text-sm mb-2 line-clamp-2">
+                    {item.description.tr}
+                  </p>
                   {item.media && item.media.length > 0 && (
                     <p className="text-xs text-muted-foreground mb-4">
-                      {item.media.length} medya öğesi ({item.media.filter((m) => m.type === "image").length} görsel, {item.media.filter((m) => m.type === "video").length} video)
+                      {item.media.length} medya öğesi (
+                      {item.media.filter((m) => m.type === "image").length}{" "}
+                      görsel,{" "}
+                      {item.media.filter((m) => m.type === "video").length}{" "}
+                      video)
                     </p>
                   )}
                   {item.tags?.tr && item.tags.tr.length > 0 && (
@@ -274,11 +355,19 @@ export function PortfolioManager() {
                     </div>
                   )}
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(item)}
+                    >
                       <Edit className="mr-2 h-4 w-4" />
                       Düzenle
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(item.id)}
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Sil
                     </Button>
@@ -293,7 +382,9 @@ export function PortfolioManager() {
       {portfolioItems.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground mb-4">Henüz portfolio öğesi yok</p>
+            <p className="text-muted-foreground mb-4">
+              Henüz portfolio öğesi yok
+            </p>
             <Button onClick={handleAdd}>
               <Plus className="mr-2 h-4 w-4" />
               İlk Öğeyi Ekle
@@ -315,7 +406,9 @@ export function PortfolioManager() {
               <Label>ID</Label>
               <Input
                 value={formData.id}
-                onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, id: e.target.value })
+                }
                 placeholder="benzersiz-id"
               />
             </div>
@@ -327,7 +420,11 @@ export function PortfolioManager() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    title: { ...formData.title, tr: e.target.value, en: formData.title?.en || "" },
+                    title: {
+                      ...formData.title,
+                      tr: e.target.value,
+                      en: formData.title?.en || "",
+                    },
                   })
                 }
                 placeholder="Türkçe başlık"
@@ -341,7 +438,11 @@ export function PortfolioManager() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    title: { ...formData.title, en: e.target.value, tr: formData.title?.tr || "" },
+                    title: {
+                      ...formData.title,
+                      en: e.target.value,
+                      tr: formData.title?.tr || "",
+                    },
                   })
                 }
                 placeholder="English title"
@@ -356,7 +457,11 @@ export function PortfolioManager() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      category: { ...formData.category, tr: e.target.value, en: formData.category?.en || "" },
+                      category: {
+                        ...formData.category,
+                        tr: e.target.value,
+                        en: formData.category?.en || "",
+                      },
                     })
                   }
                   placeholder="Tasarım"
@@ -369,7 +474,11 @@ export function PortfolioManager() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      category: { ...formData.category, en: e.target.value, tr: formData.category?.tr || "" },
+                      category: {
+                        ...formData.category,
+                        en: e.target.value,
+                        tr: formData.category?.tr || "",
+                      },
                     })
                   }
                   placeholder="Design"
@@ -385,7 +494,11 @@ export function PortfolioManager() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      description: { ...formData.description, tr: e.target.value, en: formData.description?.en || "" },
+                      description: {
+                        ...formData.description,
+                        tr: e.target.value,
+                        en: formData.description?.en || "",
+                      },
                     })
                   }
                   placeholder="Türkçe açıklama"
@@ -399,7 +512,11 @@ export function PortfolioManager() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      description: { ...formData.description, en: e.target.value, tr: formData.description?.tr || "" },
+                      description: {
+                        ...formData.description,
+                        en: e.target.value,
+                        tr: formData.description?.tr || "",
+                      },
                     })
                   }
                   placeholder="English description"
@@ -423,7 +540,9 @@ export function PortfolioManager() {
               <Input
                 type="text"
                 value={formData.year || ""}
-                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, year: e.target.value })
+                }
                 placeholder="2024"
               />
             </div>
@@ -472,4 +591,3 @@ export function PortfolioManager() {
     </>
   );
 }
-

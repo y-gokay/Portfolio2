@@ -46,7 +46,6 @@ export function PortfolioModal({ item, isOpen, onClose }: PortfolioModalProps) {
       mediaItems.push({
         type: "video",
         url: item.video,
-        thumbnail: item.image,
       });
     }
 

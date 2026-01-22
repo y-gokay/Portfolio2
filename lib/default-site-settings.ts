@@ -83,26 +83,18 @@ export const defaultSiteSettings: SiteSettings = {
         },
         tools: {
           title: "Kullandığım Araçlar",
-          categories: {
-            design: {
-              title: "Tasarım",
-              items: [
-                "Adobe Photoshop",
-                "Adobe Illustrator",
-                "Adobe InDesign",
-                "Figma",
-                "Adobe XD",
-              ],
-            },
-            prototyping: {
-              title: "Prototipleme",
-              items: ["Figma", "Adobe XD", "Sketch"],
-            },
-            development: {
-              title: "Geliştirme",
-              items: ["HTML/CSS", "JavaScript", "React", "Next.js"],
-            },
-          },
+          items: [
+            "Adobe Photoshop",
+            "Adobe Illustrator",
+            "Adobe InDesign",
+            "Figma",
+            "Adobe XD",
+            "Sketch",
+            "HTML/CSS",
+            "JavaScript",
+            "React",
+            "Next.js",
+          ],
         },
       },
       research: {
@@ -221,26 +213,18 @@ export const defaultSiteSettings: SiteSettings = {
         },
         tools: {
           title: "Tools I Use",
-          categories: {
-            design: {
-              title: "Design",
-              items: [
-                "Adobe Photoshop",
-                "Adobe Illustrator",
-                "Adobe InDesign",
-                "Figma",
-                "Adobe XD",
-              ],
-            },
-            prototyping: {
-              title: "Prototyping",
-              items: ["Figma", "Adobe XD", "Sketch"],
-            },
-            development: {
-              title: "Development",
-              items: ["HTML/CSS", "JavaScript", "React", "Next.js"],
-            },
-          },
+          items: [
+            "Adobe Photoshop",
+            "Adobe Illustrator",
+            "Adobe InDesign",
+            "Figma",
+            "Adobe XD",
+            "Sketch",
+            "HTML/CSS",
+            "JavaScript",
+            "React",
+            "Next.js",
+          ],
         },
       },
       research: {
@@ -365,6 +349,8 @@ export const defaultSiteSettings: SiteSettings = {
     carousel: true,
     research: true,
     awards: true,
+    exhibitions: true,
+    resume: true,
     contact: true,
   },
 };

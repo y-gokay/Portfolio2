@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { setPortfolioItems } from "@/lib/kv";
+import { PortfolioRepository } from "@/lib/repositories/portfolio.repository";
 import { portfolioItems } from "@/lib/portfolio-data";
 
 // Bu route mevcut statik verileri KV'ye yükler
@@ -8,7 +8,8 @@ import { portfolioItems } from "@/lib/portfolio-data";
 // GET metodu ekle - browser'dan ve build sırasında keşfedilsin diye
 export async function GET() {
   try {
-    const success = await setPortfolioItems(portfolioItems);
+    const repository = new PortfolioRepository();
+    const success = await repository.set(portfolioItems);
     
     if (!success) {
       return NextResponse.json(
@@ -52,7 +53,8 @@ export async function GET() {
 
 export async function POST() {
   try {
-    const success = await setPortfolioItems(portfolioItems);
+    const repository = new PortfolioRepository();
+    const success = await repository.set(portfolioItems);
     
     if (!success) {
       return NextResponse.json(

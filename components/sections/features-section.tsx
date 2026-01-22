@@ -166,13 +166,8 @@ export function FeaturesSection() {
           transition={{ delay: 0.3 }}
         >
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-            {/* All Tools - Combined list without categories */}
-            {[
-              ...t.skills.tools.categories.design.items,
-              ...t.skills.tools.categories.prototyping.items,
-              ...t.skills.tools.categories.development.items,
-            ]
-              .filter((tool, index, self) => self.indexOf(tool) === index) // Remove duplicates
+            {/* All Tools - Single list without categories */}
+            {(t.skills.tools?.items || [])
               .map((tool, index) => (
                 <motion.div
                   key={index}

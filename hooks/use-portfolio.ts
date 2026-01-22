@@ -11,7 +11,7 @@ export function usePortfolio() {
   useEffect(() => {
     async function fetchPortfolio() {
       try {
-        const response = await fetch("/api/portfolio");
+        const response = await fetch("/api/v1/portfolio");
         const result = await response.json();
 
         if (result.success) {

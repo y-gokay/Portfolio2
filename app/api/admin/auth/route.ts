@@ -1,27 +1,47 @@
-import { NextResponse } from "next/server";
+/**
+ * Admin Authentication API Route
+ * Simple session-based authentication for admin panel
+ */
 
-export async function POST(request: Request) {
+import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+// Simple password check (in production, use proper authentication)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { password } = body;
-    
-    // Server-side password kontrolü - Environment variable'dan oku
-    const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
-    
-    if (password === adminPassword) {
+
+    if (!password) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Şifre gerekli",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (password === ADMIN_PASSWORD) {
       return NextResponse.json({
         success: true,
+        message: "Giriş başarılı",
       });
+    } else {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Geçersiz şifre",
+        },
+        { status: 401 }
+      );
     }
-    
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Yanlış şifre",
-      },
-      { status: 401 }
-    );
   } catch (error) {
+    console.error("Admin auth error:", error);
     return NextResponse.json(
       {
         success: false,
@@ -31,4 +51,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

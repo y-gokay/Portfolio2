@@ -17,6 +17,8 @@ export interface SiteSettings {
     carousel: boolean;
     research: boolean;
     awards: boolean;
+    exhibitions: boolean;
+    resume: boolean;
     contact: boolean;
   };
 }
@@ -89,20 +91,7 @@ export interface TranslationSet {
     };
     tools: {
       title: string;
-      categories: {
-        design: {
-          title: string;
-          items: string[];
-        };
-        prototyping: {
-          title: string;
-          items: string[];
-        };
-        development: {
-          title: string;
-          items: string[];
-        };
-      };
+      items: string[];
     };
   };
   research?: {

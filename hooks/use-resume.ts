@@ -11,7 +11,7 @@ export function useResume() {
   useEffect(() => {
     async function fetchResume() {
       try {
-        const response = await fetch("/api/resume");
+        const response = await fetch("/api/v1/resume");
         const result = await response.json();
 
         if (result.success && result.data) {

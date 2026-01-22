@@ -35,7 +35,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Fetch translations from KV
-    fetch("/api/site-settings")
+    fetch("/api/v1/site-settings")
       .then((res) => res.json())
       .then((result) => {
         if (result.success && result.data?.translations) {

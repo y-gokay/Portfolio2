@@ -45,11 +45,12 @@ export function CarouselSection() {
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  // Duplicate items for seamless loop (3 copies for smooth infinite scroll)
-  const duplicatedItems =
-    portfolioItems.length > 0
+  // Only duplicate items if we have at least 3 items (for seamless infinite scroll)
+  // If we have fewer than 3 items, show them without duplication
+  const shouldScroll = portfolioItems.length >= 3;
+  const duplicatedItems = shouldScroll && portfolioItems.length > 0
       ? [...portfolioItems, ...portfolioItems, ...portfolioItems]
-      : [];
+      : portfolioItems;
 
   const gap = 24; // gap-6 = 1.5rem = 24px
   const singleSetWidth =
@@ -57,8 +58,9 @@ export function CarouselSection() {
       ? portfolioItems.length * (itemWidth + gap)
       : itemWidth + gap;
 
-  // Helper function to wrap position for seamless infinite loop
+  // Helper function to wrap position for seamless infinite loop (only if shouldScroll)
   const wrapPosition = (pos: number): number => {
+    if (!shouldScroll) return pos; // Don't wrap if we have fewer than 3 items
     if (singleSetWidth <= 0) return pos;
     if (pos <= -singleSetWidth) {
       return pos + singleSetWidth;
@@ -69,9 +71,9 @@ export function CarouselSection() {
     return pos;
   };
 
-  // Auto-scroll animation (only when not dragging and not paused/hovered, and not showing all)
+  // Auto-scroll animation (only when we have enough items, not dragging, not paused/hovered, and not showing all)
   useAnimationFrame(() => {
-    if (!showAll && !isDragging && !isPaused && hoveredIndex === null) {
+    if (shouldScroll && !showAll && !isDragging && !isPaused && hoveredIndex === null) {
       const currentBaseX = baseX.get();
       const scrollSpeed = 0.5;
       let newX = currentBaseX - scrollSpeed;
@@ -231,26 +233,26 @@ export function CarouselSection() {
               >
                 <motion.div
                   className="flex gap-4 sm:gap-6 py-4 will-change-transform"
-                  style={{ x }}
-                  drag="x"
-                  dragConstraints={{ left: -Infinity, right: Infinity }}
-                  dragElastic={0.05}
-                  dragMomentum={false}
-                  onDragStart={(event, info) => {
+                  style={{ x: shouldScroll ? x : 0 }}
+                  drag={shouldScroll ? "x" : false}
+                  dragConstraints={shouldScroll ? { left: -Infinity, right: Infinity } : undefined}
+                  dragElastic={shouldScroll ? 0.05 : undefined}
+                  dragMomentum={shouldScroll ? false : undefined}
+                  onDragStart={shouldScroll ? (event, info) => {
                     setIsDragging(true);
                     // Stop auto-scroll by saving current position
                     dragStartXRef.current = baseX.get();
                     // Set x to current baseX to ensure sync
                     x.set(baseX.get());
-                  }}
-                  onDrag={(event, info) => {
+                  } : undefined}
+                  onDrag={shouldScroll ? (event, info) => {
                     // During drag, calculate position from saved start position + drag offset
                     // Don't wrap during drag to allow smooth dragging experience
                     const dragX = dragStartXRef.current + info.offset.x;
                     // Update x directly (baseX stays at dragStartXRef until dragEnd)
                     x.set(dragX);
-                  }}
-                  onDragEnd={(event, info) => {
+                  } : undefined}
+                  onDragEnd={shouldScroll ? (event, info) => {
                     setIsDragging(false);
 
                     // Calculate final position after drag
@@ -263,9 +265,9 @@ export function CarouselSection() {
                     // This ensures seamless continuation of auto-scroll after drag
                     baseX.set(wrappedX);
                     x.set(wrappedX);
-                  }}
+                  } : undefined}
                 >
-                  {duplicatedItems.map((item, i) => (
+                  {(shouldScroll ? duplicatedItems : portfolioItems).map((item, i) => (
                     <motion.div
                       key={`${item.id}-${i}`}
                       className="relative shrink-0 rounded-lg sm:rounded-xl overflow-hidden shadow-xl sm:shadow-2xl cursor-pointer select-none group"

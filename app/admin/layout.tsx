@@ -14,6 +14,7 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -23,11 +24,12 @@ export default function AdminLayout({
     if (auth === "true") {
       setIsAuthenticated(true);
     }
+    setIsLoading(false);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Şifreyi API route üzerinden kontrol et (güvenli)
     try {
       const response = await fetch("/api/admin/auth", {
@@ -35,9 +37,9 @@ export default function AdminLayout({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         sessionStorage.setItem("admin_authenticated", "true");
         setIsAuthenticated(true);
@@ -73,9 +75,7 @@ export default function AdminLayout({
                   autoFocus
                 />
               </div>
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full">
                 Giriş Yap
               </Button>
@@ -89,8 +89,10 @@ export default function AdminLayout({
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-4 text-center">
-              Varsayılan şifre: admin123<br />
-              Production'da Vercel Environment Variable olarak ADMIN_PASSWORD ekleyin!
+              Varsayılan şifre: admin123
+              <br />
+              Production'da Vercel Environment Variable olarak ADMIN_PASSWORD
+              ekleyin!
             </p>
           </CardContent>
         </Card>
@@ -100,4 +102,3 @@ export default function AdminLayout({
 
   return <>{children}</>;
 }
-

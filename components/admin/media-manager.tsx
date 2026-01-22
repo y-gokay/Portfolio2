@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Upload, X, Image as ImageIcon, Video, Plus, Trash2, Save, GripVertical, Eye } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Video, Plus, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { MediaItem } from "@/lib/portfolio-data";
@@ -40,9 +40,9 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
       {
         type: "image",
         url: "",
-        thumbnail: undefined,
       },
     ]);
+    onChange([...mediaItems, { type: "image", url: "" }]);
   };
 
   const handleRemoveMedia = (index: number) => {
@@ -65,7 +65,6 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
     const file = event instanceof File ? event : event.target.files?.[0];
     if (!file) return;
 
-    // Check file type
     const isImage = file.type.startsWith("image/");
     const isVideo = file.type.startsWith("video/");
 
@@ -74,20 +73,17 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
       return;
     }
 
-    // Check file size (max 10MB for base64)
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Dosya boyutu çok büyük (maksimum 10MB)");
       return;
     }
 
-    // Convert to base64 for preview and storage
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
       const newMediaItem: MediaItem = {
         type: isImage ? "image" : "video",
         url: base64String,
-        thumbnail: isVideo ? undefined : undefined,
       };
 
       const newMedia = [...mediaItems, newMediaItem];
@@ -146,9 +142,9 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
 
   return (
     <Card>
-      <CardHeader>
+      <CardContent className="p-4 space-y-4">
         <div className="flex justify-between items-center">
-          <CardTitle>{title}</CardTitle>
+          <h3 className="font-semibold">{title}</h3>
           <div className="flex gap-2">
             <Button
               type="button"
@@ -165,8 +161,7 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
             </Button>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+
         <input
           ref={fileInputRef}
           type="file"
@@ -214,10 +209,8 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
             >
               <CardContent className="p-4">
                 <div className="space-y-3">
-                  {/* Drag Handle */}
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <GripVertical className="w-4 h-4" />
                       <span>#{index + 1}</span>
                     </div>
                     <Button
@@ -231,7 +224,6 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
                     </Button>
                   </div>
 
-                  {/* Preview */}
                   <div className="relative aspect-video bg-secondary rounded-lg overflow-hidden cursor-pointer"
                     onClick={() => setPreviewItem(item)}
                   >
@@ -270,7 +262,6 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
                     </Button>
                   </div>
 
-                  {/* Type Selector */}
                   <div>
                     <Label>Tip</Label>
                     <select
@@ -285,7 +276,6 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
                     </select>
                   </div>
 
-                  {/* URL Input */}
                   <div>
                     <Label>URL</Label>
                     <Input
@@ -294,18 +284,6 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
                       placeholder="/image.jpg veya https://..."
                     />
                   </div>
-
-                  {/* Thumbnail Input (for videos) */}
-                  {item.type === "video" && (
-                    <div>
-                      <Label>Thumbnail URL (isteğe bağlı)</Label>
-                      <Input
-                        value={item.thumbnail || ""}
-                        onChange={(e) => handleMediaChange(index, "thumbnail", e.target.value)}
-                        placeholder="/thumbnail.jpg"
-                      />
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -313,7 +291,6 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
         </div>
       </CardContent>
 
-      {/* Preview Dialog */}
       <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -344,12 +321,6 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
                   <Label className="text-xs text-muted-foreground">URL</Label>
                   <Input value={previewItem.url || ""} readOnly className="font-mono text-xs" />
                 </div>
-                {previewItem.thumbnail && (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Thumbnail</Label>
-                    <Input value={previewItem.thumbnail} readOnly className="font-mono text-xs" />
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -358,4 +329,3 @@ export function MediaManager({ media, onChange, title = "Medya Yönetimi" }: Med
     </Card>
   );
 }
-

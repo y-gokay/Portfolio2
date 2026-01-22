@@ -22,6 +22,7 @@ export function ManifestoSection() {
   
   // Get CV URL from KV or fallback to default
   const cvUrl = settings?.cvUrl || defaultSiteSettings.cvUrl || "/cv.pdf"
+  const hasCv = cvUrl && cvUrl.trim() !== "" && cvUrl !== "/cv.pdf"
 
   return (
     <section
@@ -114,43 +115,45 @@ export function ManifestoSection() {
             </ul>
           </div>
 
-          {/* CV Download Button */}
-          <motion.div
-            className="mt-8 sm:mt-10 md:mt-12 flex justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ delay: 0.8 }}
-          >
-            <a
-              href={cvUrl}
-              download
-              className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg sm:rounded-xl hover:bg-primary/90 transition-colors shadow-sm dark:shadow-lg dark:shadow-primary/20 font-medium text-sm sm:text-base"
-              onClick={(e) => {
-                // Eğer URL bir external URL ise, yeni sekmede aç
-                if (cvUrl.startsWith("http")) {
-                  e.preventDefault();
-                  window.open(cvUrl, "_blank");
-                  return;
-                }
-                // Eğer PDF dosyası yoksa, resume sayfasına yönlendir
-                fetch(cvUrl, { method: "HEAD" })
-                  .then((res) => {
-                    if (!res.ok) {
+          {/* CV Download Button - Only show if CV is uploaded */}
+          {hasCv && (
+            <motion.div
+              className="mt-8 sm:mt-10 md:mt-12 flex justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: 0.8 }}
+            >
+              <a
+                href={cvUrl}
+                download
+                className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg sm:rounded-xl hover:bg-primary/90 transition-colors shadow-sm dark:shadow-lg dark:shadow-primary/20 font-medium text-sm sm:text-base"
+                onClick={(e) => {
+                  // Eğer URL bir external URL ise, yeni sekmede aç
+                  if (cvUrl.startsWith("http")) {
+                    e.preventDefault();
+                    window.open(cvUrl, "_blank");
+                    return;
+                  }
+                  // Eğer PDF dosyası yoksa, resume sayfasına yönlendir
+                  fetch(cvUrl, { method: "HEAD" })
+                    .then((res) => {
+                      if (!res.ok) {
+                        e.preventDefault();
+                        window.location.href = "/resume";
+                      }
+                    })
+                    .catch(() => {
                       e.preventDefault();
                       window.location.href = "/resume";
-                    }
-                  })
-                  .catch(() => {
-                    e.preventDefault();
-                    window.location.href = "/resume";
-                  });
-              }}
-            >
-              <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>{t.resume.download}</span>
-            </a>
-          </motion.div>
+                    });
+                }}
+              >
+                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>{t.resume.download}</span>
+              </a>
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </section>

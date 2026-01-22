@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useLanguage } from "@/contexts/language-context";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 
 export function StickyHeader() {
   const { t } = useLanguage();
+  const { settings } = useSiteSettings();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -23,26 +25,53 @@ export function StickyHeader() {
     setIsScrolled(latest > 50);
   });
 
-  // Use default translations until mounted to ensure SSR/client match
-  const navLinks = mounted ? [
-    { label: t.navigation?.home || "Ana Sayfa", href: "/#main-content" },
-    { label: t.navigation?.about || "Hakkımda", href: "/#about" },
-    { label: t.navigation?.skills || "Yetenekler", href: "/#skills" },
-    { label: t.navigation?.portfolio || "Portföy", href: "/#portfolio" },
-    { label: t.navigation?.research || "Projelerim", href: "/#research" },
-    { label: t.navigation?.awards || "Ödüller & Sergiler", href: "/#awards" },
-    { label: t.navigation?.resume || "Özgeçmiş", href: "/resume" },
-    { label: t.navigation?.contact || "İletişim", href: "/#contact" },
+  // Get section visibility settings
+  const visibility = settings?.sectionVisibility || {
+    hero: true,
+    about: true,
+    portfolio: true,
+    skills: true,
+    carousel: true,
+    research: true,
+    awards: true,
+    exhibitions: true,
+    resume: true,
+    contact: true,
+  };
+
+  // Build navigation links based on visibility
+  const allNavLinks = mounted ? [
+    { label: t.navigation?.home || "Ana Sayfa", href: "/#main-content", key: "hero" },
+    { label: t.navigation?.about || "Hakkımda", href: "/#about", key: "about" },
+    { label: t.navigation?.skills || "Yetenekler", href: "/#skills", key: "skills" },
+    { label: t.navigation?.portfolio || "Portföy", href: "/#portfolio", key: "portfolio" },
+    { label: t.navigation?.research || "Projelerim", href: "/#research", key: "research" },
+    { label: t.navigation?.awards || "Ödüller & Sergiler", href: "/#awards", key: "awards" },
+    { label: t.navigation?.resume || "Özgeçmiş", href: "/resume", key: "resume" },
+    { label: t.navigation?.contact || "İletişim", href: "/#contact", key: "contact" },
   ] : [
-    { label: "Ana Sayfa", href: "/#main-content" },
-    { label: "Hakkımda", href: "/#about" },
-    { label: "Yetenekler", href: "/#skills" },
-    { label: "Portföy", href: "/#portfolio" },
-    { label: "Projelerim", href: "/#research" },
-    { label: "Ödüller & Sergiler", href: "/#awards" },
-    { label: "Özgeçmiş", href: "/resume" },
-    { label: "İletişim", href: "/#contact" },
+    { label: "Ana Sayfa", href: "/#main-content", key: "hero" },
+    { label: "Hakkımda", href: "/#about", key: "about" },
+    { label: "Yetenekler", href: "/#skills", key: "skills" },
+    { label: "Portföy", href: "/#portfolio", key: "portfolio" },
+    { label: "Projelerim", href: "/#research", key: "research" },
+    { label: "Ödüller & Sergiler", href: "/#awards", key: "awards" },
+    { label: "Özgeçmiş", href: "/resume", key: "resume" },
+    { label: "İletişim", href: "/#contact", key: "contact" },
   ];
+
+  // Filter navigation links based on visibility
+  const navLinks = allNavLinks.filter(link => {
+    // Always show home/hero
+    if (link.key === "hero") return true;
+    // Resume is a separate page, check visibility
+    if (link.key === "resume") {
+      return visibility.resume !== false;
+    }
+    // Map navigation keys to visibility keys
+    const visibilityKey = link.key === "research" ? "research" : link.key;
+    return visibility[visibilityKey as keyof typeof visibility] !== false;
+  });
 
   const handleLinkClick = (href: string) => {
     setIsMobileMenuOpen(false);

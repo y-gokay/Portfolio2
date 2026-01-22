@@ -54,7 +54,7 @@ export default function Home() {
           {getSectionVisibility("portfolio") && <ShowcaseSection />}
           {getSectionVisibility("carousel") && <CarouselSection />}
           {getSectionVisibility("research") && <InsightsSection />}
-          {getSectionVisibility("awards") && <AwardsSection />}
+          {(getSectionVisibility("awards") || getSectionVisibility("exhibitions")) && <AwardsSection />}
           {getSectionVisibility("contact") && <FooterSection />}
         </main>
         <BackToTop />

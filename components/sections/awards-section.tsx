@@ -6,15 +6,21 @@ import { useLanguage } from "@/contexts/language-context";
 import { Award, Trophy, Star, ChevronDown, ChevronUp } from "lucide-react";
 import { AwardExhibitionModal } from "@/components/award-exhibition-modal";
 import { useAwards } from "@/hooks/use-awards";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { AwardItem, ExhibitionItem } from "@/lib/awards-data";
 
 export function AwardsSection() {
   const { t, language } = useLanguage();
   const { awardsData, loading, error } = useAwards();
+  const { getSectionVisibility } = useSiteSettings();
   const [showAllAwards, setShowAllAwards] = useState(false);
   const [showAllExhibitions, setShowAllExhibitions] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{ item: AwardItem | ExhibitionItem; type: "award" | "exhibition" } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Check visibility for awards and exhibitions separately
+  const awardsVisible = getSectionVisibility("awards");
+  const exhibitionsVisible = getSectionVisibility("exhibitions");
 
   const handleItemClick = (itemId: string, type: "award" | "exhibition") => {
     if (type === "award") {
@@ -72,6 +78,11 @@ export function AwardsSection() {
     description: exhibition.description ? exhibition.description[language] : undefined,
   }));
 
+  // If both awards and exhibitions are hidden, don't render the section
+  if (!awardsVisible && !exhibitionsVisible) {
+    return null;
+  }
+
   if (error || (displayAwards.length === 0 && displayExhibitions.length === 0)) {
     return (
       <section
@@ -124,6 +135,7 @@ export function AwardsSection() {
         </motion.div>
 
         {/* Awards */}
+        {awardsVisible && (
         <motion.div
           className="mb-12 sm:mb-16"
           initial={{ opacity: 0, y: 20 }}
@@ -195,8 +207,10 @@ export function AwardsSection() {
             </motion.div>
           )}
         </motion.div>
+        )}
 
         {/* Exhibitions */}
+        {exhibitionsVisible && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -266,6 +280,7 @@ export function AwardsSection() {
             </motion.div>
           )}
         </motion.div>
+        )}
       </div>
 
       {/* Modal */}
